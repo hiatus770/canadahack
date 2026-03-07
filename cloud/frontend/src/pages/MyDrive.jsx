@@ -6,7 +6,7 @@ import FileRow from '../components/FileRow'
 import SortDropdown, { useSort, useSortedFiles } from '../components/SortDropdown'
 import { FolderIcon, IconGrid, IconList } from '../components/icons'
 import { useSearch } from '../context/SearchContext'
-import { listAllFiles, listMachines } from '../api'
+import { listAllFiles, listMachines, deleteFile, renameFile } from '../api'
 import FileViewer from '../components/FileViewer'
 
 function formatBytes(bytes) {
@@ -63,6 +63,26 @@ export default function MyDrive() {
     navigate(`/browse?path=${encodeURIComponent(folder.path)}`)
   }
 
+  async function handleDelete(file) {
+    try {
+      await deleteFile(file.path)
+      setEntries(prev => prev.filter(e => e.path !== file.path))
+    } catch (err) {
+      console.error('Delete failed:', err)
+    }
+  }
+
+  async function handleRename(file, newName) {
+    const dir = file.path.substring(0, file.path.lastIndexOf('/') + 1)
+    const newPath = dir + newName
+    try {
+      await renameFile(file.path, newPath)
+      setEntries(prev => prev.map(e => e.path === file.path ? { ...e, name: newName, path: newPath } : e))
+    } catch (err) {
+      console.error('Rename failed:', err)
+    }
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.pageHeader}>
@@ -112,7 +132,7 @@ export default function MyDrive() {
                   <div className={styles.filesGrid}>
                     {files.map(f => (
                       <div key={f.path} onClick={() => setViewerFile(f)}>
-                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} />
+                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} />
                       </div>
                     ))}
                   </div>

@@ -132,7 +132,7 @@
 /* ── Folders grid ── */
 .foldersGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 28px;
 }
@@ -164,7 +164,7 @@
 /* ── Files grid ── */
 .filesGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
@@ -245,6 +245,32 @@
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+}
+
+/* ── Card more menu button ── */
+.cardMoreBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.fileCard:hover .cardMoreBtn { opacity: 1; }
+
+/* ── Inline rename input ── */
+.renameInput {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-1000);
+  border: 1px solid var(--blue-400);
+  border-radius: 4px;
+  padding: 1px 5px;
+  outline: none;
+  background: #fff;
+  font-family: inherit;
 }
 
 /* ── List view (Recent, Trash) ── */

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import styles from '../components/page.module.css'
 import FileCard from '../components/FileCard'
@@ -6,7 +6,8 @@ import FileRow from '../components/FileRow'
 import SortDropdown, { useSort, useSortedFiles } from '../components/SortDropdown'
 import { FolderIcon, IconGrid, IconList, IconChevronRight } from '../components/icons'
 import { useSearch } from '../context/SearchContext'
-import { listFiles } from '../api'
+import { listFiles, deleteFile, renameFile } from '../api'
+import MoreMenu from '../components/MoreMenu'
 import FileViewer from '../components/FileViewer'
 
 function formatBytes(bytes) {
@@ -25,6 +26,51 @@ const FOLDER_COLORS = [
   { fill: '#DAD6D5', stroke: '#AFACAB' },
 ]
 
+function FolderItem({ folder, color, onClick, onRename, onDelete }) {
+  const [renaming, setRenaming] = useState(false)
+  const [renameVal, setRenameVal] = useState(folder.name)
+  const inputRef = useRef(null)
+
+  function startRename() {
+    setRenameVal(folder.name)
+    setRenaming(true)
+    setTimeout(() => inputRef.current?.select(), 0)
+  }
+
+  function commitRename() {
+    const trimmed = renameVal.trim()
+    if (trimmed && trimmed !== folder.name) onRename(folder, trimmed)
+    setRenaming(false)
+  }
+
+  return (
+    <div
+      className={styles.folderItem}
+      onClick={() => !renaming && onClick()}
+      style={{ cursor: 'pointer', justifyContent: 'flex-start', gap: 12 }}
+    >
+      <FolderIcon fill={color.fill} stroke={color.stroke} />
+      {renaming ? (
+        <input
+          ref={inputRef}
+          className={styles.renameInput}
+          value={renameVal}
+          onChange={e => setRenameVal(e.target.value)}
+          onBlur={commitRename}
+          onKeyDown={e => { if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') setRenaming(false) }}
+          onClick={e => e.stopPropagation()}
+          style={{ flex: 1 }}
+        />
+      ) : (
+        <span className={styles.folderName} style={{ flex: 1 }}>{folder.name}</span>
+      )}
+      <div onClick={e => e.stopPropagation()}>
+        <MoreMenu onRename={onRename ? startRename : undefined} onDelete={() => onDelete(folder)} />
+      </div>
+    </div>
+  )
+}
+
 export default function BrowseFolder() {
   const [searchParams] = useSearchParams()
   const currentPath = searchParams.get('path') || '/'
@@ -37,6 +83,26 @@ export default function BrowseFolder() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewerFile, setViewerFile] = useState(null)
+
+  async function handleDelete(file) {
+    try {
+      await deleteFile(file.path)
+      setEntries(prev => prev.filter(e => e.path !== file.path))
+    } catch (err) {
+      console.error('Delete failed:', err)
+    }
+  }
+
+  async function handleRename(file, newName) {
+    const dir = file.path.substring(0, file.path.lastIndexOf('/') + 1)
+    const newPath = dir + newName
+    try {
+      await renameFile(file.path, newPath)
+      setEntries(prev => prev.map(e => e.path === file.path ? { ...e, name: newName, path: newPath } : e))
+    } catch (err) {
+      console.error('Rename failed:', err)
+    }
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -110,15 +176,14 @@ export default function BrowseFolder() {
                   {folders.map((folder, i) => {
                     const color = FOLDER_COLORS[i % FOLDER_COLORS.length]
                     return (
-                      <div
+                      <FolderItem
                         key={folder.path}
-                        className={styles.folderItem}
+                        folder={folder}
+                        color={color}
                         onClick={() => navigate(`/browse?path=${encodeURIComponent(folder.path)}`)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <FolderIcon fill={color.fill} stroke={color.stroke} />
-                        <span className={styles.folderName}>{folder.name}</span>
-                      </div>
+                        onRename={folder.path.split('/').filter(Boolean).length > 2 ? handleRename : undefined}
+                        onDelete={folder.path.split('/').filter(Boolean).length > 2 ? handleDelete : undefined}
+                      />
                     )
                   })}
                 </div>
@@ -132,7 +197,7 @@ export default function BrowseFolder() {
                   <div className={styles.filesGrid}>
                     {files.map(f => (
                       <div key={f.path} onClick={() => setViewerFile(f)}>
-                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} />
+                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} />
                       </div>
                     ))}
                   </div>
