@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{.Label}} — TailCloud Share</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f6f8;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 40px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a5568;
+  }
+  .logo svg { width: 28px; height: 28px; }
+  .label {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  .sublabel {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 24px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .badge-onetime { background: #fff3cd; color: #856404; }
+  .badge-active { background: #d4edda; color: #155724; }
+  .form-group { margin-bottom: 16px; text-align: left; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    width: 100%;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-download { background: #10b981; color: #fff; }
+  .btn-download:hover { background: #059669; }
+  .error-msg {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+  .disabled-msg {
+    color: #718096;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  /* Authenticated view */
+  .file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .file-icon {
+    width: 56px;
+    height: 56px;
+    background: #eff6ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .file-icon svg { width: 28px; height: 28px; color: #3b82f6; }
+  .file-name {
+    font-size: 16px;
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .file-size {
+    font-size: 13px;
+    color: #718096;
+  }
+  /* Folder listing */
+  .file-list {
+    text-align: left;
+    margin-bottom: 20px;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .file-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  .file-list-item:last-child { border-bottom: none; }
+  .file-list-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .file-list-item a:hover { text-decoration: underline; }
+  .file-list-name { word-break: break-all; }
+  .file-list-size { color: #718096; font-size: 12px; white-space: nowrap; margin-left: 12px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5">
+      <path d="M3 15a4 4 0 004 4h9a5 5 0 10-1-9.9A7 7 0 103 15z"/>
+    </svg>
+    tailcloud
+  </div>
+
+  {{if not .Active}}
+    <div class="label">Link Disabled</div>
+    <p class="disabled-msg">This share link is no longer active.</p>
+  {{else if .Authenticated}}
+    <div class="label">{{.Label}}</div>
+    {{if .OneTime}}
+      <div class="badge badge-onetime">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3v3l2 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        One-time link &mdash; expires when you close this tab
+      </div>
+    {{end}}
+
+    {{if .IsDir}}
+      <div id="folder-view">
+        <div class="file-info">
+          <div class="file-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            </svg>
+          </div>
+          <div class="file-name">{{.Label}}</div>
+        </div>
+        <div class="file-list" id="file-list">
+          <div style="text-align:center;color:#718096;padding:20px;">Loading files...</div>
+        </div>
+      </div>
+    {{else}}
+      <div class="file-info">
+        <div class="file-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+        </div>
+        <div class="file-name">{{.FileName}}</div>
+        {{if .FileSize}}<div class="file-size">{{.FileSize}}</div>{{end}}
+      </div>
+      <a id="download-link" href="/s/{{.ID}}/download" class="btn btn-download">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v9M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Download
+      </a>
+    {{end}}
+
+  {{else}}
+    <div class="label">{{.Label}}</div>
+    <div class="sublabel">Enter the password to access this shared file</div>
+
+    <form id="auth-form" method="POST" action="/s/{{.ID}}/auth" data-share-id="{{.ID}}">
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" name="password" placeholder="Enter password" autocomplete="off" autofocus>
+      </div>
+      <button class="btn btn-primary" type="submit">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="3" y="6" width="8" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M5 6V4.5a2 2 0 014 0V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        Access
+      </button>
+      <div class="error-msg" id="error-msg">{{.Error}}</div>
+    </form>
+  {{end}}
+</div>
+
+<script>
+(function() {
+  // Show error message if present
+  var errEl = document.getElementById('error-msg');
+  if (errEl && errEl.textContent.trim()) {
+    errEl.classList.add('show');
+  }
+
+  var shareID = "{{.ID}}";
+  var isAuthenticated = {{.Authenticated}};
+  var isOneTime = {{.OneTime}};
+  var isDir = {{.IsDir}};
+  var isActive = {{.Active}};
+
+  // Detect base path: could be /s/{id} or /{id} (tailscale strips /s prefix)
+  var basePath = window.location.pathname.replace(/\/$/, '');
+
+  // Fix form action and download link to use actual base path
+  var form = document.getElementById('auth-form');
+  if (form) form.action = basePath + '/auth';
+  var dlLink = document.getElementById('download-link');
+  if (dlLink) dlLink.href = basePath + '/download';
+
+  if (!isActive || !isAuthenticated) return;
+
+  // Heartbeat for one-time links
+  if (isOneTime) {
+    function heartbeat() {
+      fetch(basePath + '/heartbeat', { method: 'POST', credentials: 'same-origin' }).catch(function(){});
+    }
+    heartbeat();
+    setInterval(heartbeat, 20000);
+
+    window.addEventListener('beforeunload', function() {
+      navigator.sendBeacon(basePath + '/heartbeat?close=1');
+    });
+  }
+
+  // Load folder listing
+  if (isDir) {
+    fetch(basePath + '/files', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(files) {
+        var list = document.getElementById('file-list');
+        if (!files || files.length === 0) {
+          list.innerHTML = '<div style="text-align:center;color:#718096;padding:20px;">This folder is empty</div>';
+          return;
+        }
+        var html = '';
+        files.forEach(function(f) {
+          var size = f.size ? formatBytes(f.size) : '';
+          if (f.isDir) {
+            html += '<div class="file-list-item"><span class="file-list-name">&#128193; ' + escapeHtml(f.name) + '/</span><span class="file-list-size">' + size + '</span></div>';
+          } else {
+            html += '<div class="file-list-item"><span class="file-list-name">' + escapeHtml(f.name) + '</span><span><span class="file-list-size">' + size + '</span> <a href="' + basePath + '/download?file=' + encodeURIComponent(f.name) + '">Download</a></span></div>';
+          }
+        });
+        list.innerHTML = html;
+      })
+      .catch(function() {
+        document.getElementById('file-list').innerHTML = '<div style="text-align:center;color:#dc2626;padding:20px;">Failed to load files</div>';
+      });
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes) return '0 B';
+    var k = 1024;
+    var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function escapeHtml(s) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(s));
+    return div.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>

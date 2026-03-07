@@ -18,7 +18,10 @@ export default defineConfig({
                     });
                 },
             },
+            "/s/": {
+                target: "http://localhost:8081",
+            },
         },
-        allowedHosts: ['localhost', '127.0.0.1', '100.113.170.49', 'insp', '100.64.184.29', 'anastasiyas-macbook-air', '100.121.126.78', 'rosie-zenbook'],
+        allowedHosts: ['localhost', '127.0.0.1', '100.113.170.49', 'insp', '100.64.184.29', 'anastasiyas-macbook-air', '100.121.126.78', 'rosie-zenbook', '.ts.net'],
     },
 });
