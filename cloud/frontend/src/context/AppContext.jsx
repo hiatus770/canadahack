@@ -1,11 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 
-const INITIAL_NOTIFICATIONS = [
-  { id: 1, user: 'JD', text: 'shared infra-diagram.pdf with you',   when: '5 min ago',  unread: true  },
-  { id: 2, user: 'MK', text: 'mentioned you in node-inventory.csv', when: '2 hr ago',   unread: true  },
-  { id: 3, user: 'TC', text: 'added you to Deployment Scripts',     when: '3 hr ago',   unread: false },
-  { id: 4, user: 'AL', text: 'shared network-topology.pdf',         when: 'Yesterday',  unread: false },
-]
+const INITIAL_NOTIFICATIONS = []
 
 const AppContext = createContext({})
 

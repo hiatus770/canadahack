@@ -141,14 +141,18 @@ export function HelpDropdown({ onClose }) {
 
 // ── Avatar / Profile ──────────────────────────────────────────────────────────
 
-export function AvatarDropdown({ onClose }) {
+export function AvatarDropdown({ onClose, userInfo }) {
+  const displayName = userInfo?.displayName || 'Unknown'
+  const loginName = userInfo?.loginName || ''
+  const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'
+
   return (
     <Dropdown className={styles.dropdownSm}>
       <div className={styles.profileRow}>
-        <div className={styles.profileAvatar}>MR</div>
+        <div className={styles.profileAvatar}>{initials}</div>
         <div>
-          <div className={styles.profileName}>Matt Robinson</div>
-          <div className={styles.profileEmail}>matt@tailscale.com</div>
+          <div className={styles.profileName}>{displayName}</div>
+          <div className={styles.profileEmail}>{loginName}</div>
         </div>
       </div>
       <DropDivider />

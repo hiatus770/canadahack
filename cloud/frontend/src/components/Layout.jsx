@@ -1,29 +1,22 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import styles from './Layout.module.css'
 import NewDropdown from './NewDropdown'
 import { BellDropdown, AvatarDropdown } from './HeaderDropdowns'
 import { useSearch } from '../context/SearchContext'
 import { useApp } from '../context/AppContext'
+import { listMachines, getStorage, whoami } from '../api'
 import {
   IconDiamond, IconSearch, IconBell,
-  IconPlus, IconHome, IconPeople, IconClock,
+  IconPlus, IconHome, IconClock,
   IconServer, IconTrash,
 } from './icons'
 
 const NAV_MAIN = [
   { label: 'My Drive',       to: '/drive',   Icon: IconHome,   matchPrefix: '/drive' },
-  { label: 'Shared with me', to: '/shared',  Icon: IconPeople },
   { label: 'Recent',         to: '/recent',  Icon: IconClock  },
   { label: 'Trash',          to: '/trash',   Icon: IconTrash  },
 ]
-
-const NAV_DRIVES = [
-  { label: 'prod-server', to: '/machine/prod-server' },
-  { label: 'dev-vm',      to: '/machine/dev-vm'      },
-  { label: 'backup-nas',  to: '/machine/backup-nas'  },
-]
-
 
 function useDropdown() {
   const [open, setOpen] = useState(false)
@@ -41,12 +34,39 @@ function useDropdown() {
   return { open, setOpen, ref, toggle: () => setOpen(v => !v), close: () => setOpen(false) }
 }
 
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
 export default function Layout() {
   const { query, setQuery } = useSearch()
   const { unreadCount } = useApp()
   const newDD    = useDropdown()
   const bellDD   = useDropdown()
   const avatarDD = useDropdown()
+  const [machines, setMachines] = useState([])
+  const [storage, setStorage] = useState(null)
+  const [userInfo, setUserInfo] = useState(null)
+
+  useEffect(() => {
+    listMachines()
+      .then(setMachines)
+      .catch(err => console.error('Failed to load machines:', err))
+    getStorage()
+      .then(setStorage)
+      .catch(err => console.error('Failed to load storage:', err))
+    whoami()
+      .then(setUserInfo)
+      .catch(err => console.error('Failed to load user info:', err))
+  }, [])
+
+  const initials = userInfo?.displayName
+    ? userInfo.displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?'
 
   return (
     <div className={styles.app}>
@@ -101,9 +121,9 @@ export default function Layout() {
               onClick={avatarDD.toggle}
               title="Account"
             >
-              MR
+              {initials}
             </button>
-            {avatarDD.open && <AvatarDropdown onClose={avatarDD.close} />}
+            {avatarDD.open && <AvatarDropdown onClose={avatarDD.close} userInfo={userInfo} />}
           </div>
         </div>
       </header>
@@ -136,15 +156,20 @@ export default function Layout() {
 
           <div className={styles.sectionLabel}>Tailnet Drives</div>
           <nav className={styles.nav} style={{ paddingTop: 0 }}>
-            {NAV_DRIVES.map(({ label, to }) => (
+            {machines.length === 0 && (
+              <span className={styles.navItem} style={{ opacity: 0.5, cursor: 'default' }}>
+                Loading...
+              </span>
+            )}
+            {machines.map(({ name }) => (
               <NavLink
-                key={to}
-                to={to}
+                key={name}
+                to={`/machine/${name}`}
                 className={({ isActive }) =>
                   `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
                 }
               >
-                <IconServer />{label}
+                <IconServer />{name}
               </NavLink>
             ))}
           </nav>
@@ -152,8 +177,12 @@ export default function Layout() {
           <div className={styles.sidebarSpacer} />
           <div className={styles.storageBox}>
             <div className={styles.storageLabel}>Storage</div>
-            <div className={styles.storageBar}><div className={styles.storageFill} /></div>
-            <div className={styles.storageUsed}>2.4 GB of 20 GB used</div>
+            <div className={styles.storageBar}>
+              <div className={styles.storageFill} style={{ width: storage ? `${Math.min(storage.percent, 100).toFixed(1)}%` : '0%' }} />
+            </div>
+            <div className={styles.storageUsed}>
+              {storage ? `${formatBytes(storage.used)} of ${formatBytes(storage.total)} used` : 'Loading...'}
+            </div>
             <button className={styles.storageUpgrade}>Get more storage</button>
           </div>
         </aside>

@@ -13,6 +13,10 @@ const KIND_MAP = {
   backup:       { Icon: IconFileBackup,       label: 'Backup',       thumb: { fill: '#DAD6D5', stroke: '#706E6D' }, dark: false },
   log:          { Icon: IconFileDoc,          label: 'Log',          thumb: { fill: '#DAD6D5', stroke: '#706E6D' }, dark: true  },
   config:       { Icon: IconFileDoc,          label: 'Config',       thumb: { fill: '#ADC7FC', stroke: '#5A82DE' }, dark: false },
+  image:        { Icon: IconFileDoc,          label: 'Image',        thumb: { fill: '#EFDDFD', stroke: '#995FC3' }, dark: false },
+  video:        { Icon: IconFileDoc,          label: 'Video',        thumb: { fill: '#F8E5B9', stroke: '#BB5504' }, dark: false },
+  audio:        { Icon: IconFileDoc,          label: 'Audio',        thumb: { fill: '#CBF4C9', stroke: '#09825D' }, dark: false },
+  folder:       { Icon: IconFileDoc,          label: 'Folder',       thumb: { fill: '#ADC7FC', stroke: '#5A82DE' }, dark: false },
 }
 
 export default function FileCard({ file, selected, onSelect }) {

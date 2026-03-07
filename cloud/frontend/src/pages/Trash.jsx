@@ -2,10 +2,9 @@ import { useState } from 'react'
 import styles from '../components/page.module.css'
 import { KIND_MAP } from '../components/FileCard'
 import { IconRestore, IconX } from '../components/icons'
-import { TRASH_FILES } from '../data/content'
 
 export default function Trash() {
-  const [items, setItems] = useState(TRASH_FILES)
+  const [items, setItems] = useState([])
 
   function restore(name) {
     setItems(prev => prev.filter(f => f.name !== name))

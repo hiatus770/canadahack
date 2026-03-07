@@ -268,9 +268,9 @@
 
 .storageFill {
   height: 100%;
-  width: 12%;
   background: var(--blue-400);
   border-radius: 9999px;
+  transition: width 0.3s ease;
 }
 
 .storageUsed { font-size: 11px; color: var(--gray-400); margin-bottom: 6px; }
