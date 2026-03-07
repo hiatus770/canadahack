@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tailscale Component Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --gray-50: #F9F7F6;
+    --gray-100: #F7F5F4;
+    --gray-200: #EEEBEA;
+    --gray-300: #DAD6D5;
+    --gray-400: #AFACAB;
+    --gray-500: #706E6D;
+    --gray-600: #444342;
+    --gray-700: #2E2D2D;
+    --gray-800: #232222;
+    --gray-900: #1F1E1E;
+    --gray-1000: #181717;
+    --blue-0: #F0F5FF;
+    --blue-50: #CEDEFD;
+    --blue-400: #5A82DE;
+    --blue-500: #4B70CC;
+    --blue-600: #3F5DB3;
+    --blue-700: #324994;
+    --green-50: #CBF4C9;
+    --green-200: #33C27F;
+    --green-400: #09825D;
+    --green-500: #0E6245;
+    --red-50: #FFD3CF;
+    --red-200: #F68F87;
+    --red-400: #D04841;
+    --red-500: #B22D30;
+    --orange-50: #F8E5B9;
+    --orange-400: #BB5504;
+    --purple-50: #EFDDFD;
+    --purple-400: #995FC3;
+    --focus-ring: #ADC7FC;
+    --shadow-2: 0 4px 8px 0 rgba(24,23,23,0.08);
+    --shadow-4: 0 4px 16px 0 rgba(24,23,23,0.16);
+    --transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-700);
+    line-height: 1.5;
+    padding: 48px 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--gray-1000);
+    letter-spacing: -0.56px;
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gray-1000);
+    letter-spacing: -0.28px;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    padding-top: 48px;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+    letter-spacing: 0.08px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: var(--gray-500);
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.08px;
+    line-height: 1.46;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-ring);
+  }
+
+  /* Primary */
+  .btn-primary {
+    background: var(--gray-1000);
+    color: #fff;
+    border-color: var(--gray-1000);
+  }
+  .btn-primary:hover { background: var(--gray-800); border-color: var(--gray-800); }
+  .btn-primary:active { background: var(--gray-900); }
+
+  /* Secondary */
+  .btn-secondary {
+    background: #fff;
+    color: var(--gray-700);
+    border-color: var(--gray-200);
+    box-shadow: var(--shadow-2);
+  }
+  .btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+  .btn-secondary:active { background: var(--gray-100); }
+
+  /* Ghost */
+  .btn-ghost {
+    background: transparent;
+    color: var(--gray-700);
+    border-color: transparent;
+  }
+  .btn-ghost:hover { background: var(--gray-100); }
+  .btn-ghost:active { background: var(--gray-200); }
+
+  /* Blue */
+  .btn-blue {
+    background: var(--blue-400);
+    color: #fff;
+    border-color: var(--blue-400);
+  }
+  .btn-blue:hover { background: var(--blue-500); border-color: var(--blue-500); }
+  .btn-blue:active { background: var(--blue-600); }
+
+  /* Danger */
+  .btn-danger {
+    background: var(--red-400);
+    color: #fff;
+    border-color: var(--red-400);
+  }
+  .btn-danger:hover { background: var(--red-500); border-color: var(--red-500); }
+
+  /* Success */
+  .btn-success {
+    background: var(--green-400);
+    color: #fff;
+    border-color: var(--green-400);
+  }
+  .btn-success:hover { background: var(--green-500); border-color: var(--green-500); }
+
+  /* Outline variants */
+  .btn-outline-blue {
+    background: transparent;
+    color: var(--blue-400);
+    border-color: var(--blue-400);
+  }
+  .btn-outline-blue:hover { background: var(--blue-0); }
+
+  .btn-outline-danger {
+    background: transparent;
+    color: var(--red-400);
+    border-color: var(--red-400);
+  }
+  .btn-outline-danger:hover { background: var(--red-50); }
+
+  /* Sizes */
+  .btn-sm { font-size: 13px; padding: 4px 12px; border-radius: 6px; }
+  .btn-lg { font-size: 16px; padding: 12px 32px; border-radius: 8px; }
+  .btn-xl { font-size: 18px; padding: 16px 48px; border-radius: 12px; }
+
+  /* Icon button */
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px;
+  }
+  .btn-icon.btn-sm { width: 28px; height: 28px; border-radius: 6px; }
+  .btn-icon.btn-lg { width: 44px; height: 44px; }
+
+  /* Full width */
+  .btn-block { width: 100%; }
+
+  /* Pill */
+  .btn-pill { border-radius: 9999px; }
+
+  /* Disabled */
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ---- BADGES ---- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.08px;
+  }
+  .badge-gray { background: var(--gray-200); color: var(--gray-600); }
+  .badge-blue { background: var(--blue-0); color: var(--blue-600); }
+  .badge-green { background: var(--green-50); color: var(--green-500); }
+  .badge-red { background: var(--red-50); color: var(--red-500); }
+  .badge-orange { background: var(--orange-50); color: var(--orange-400); }
+  .badge-purple { background: var(--purple-50); color: var(--purple-400); }
+  .badge-pill { border-radius: 9999px; }
+
+  /* ---- INPUTS ---- */
+  .input {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--gray-700);
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 320px;
+    transition: all var(--transition);
+    letter-spacing: 0.08px;
+  }
+  .input::placeholder { color: var(--gray-400); }
+  .input:hover { border-color: var(--gray-300); }
+  .input:focus { outline: none; border-color: var(--blue-400); box-shadow: 0 0 0 2px var(--focus-ring); }
+  .input-error { border-color: var(--red-400); }
+  .input-error:focus { box-shadow: 0 0 0 2px rgba(208,72,65,0.2); }
+  .input-sm { font-size: 13px; padding: 4px 8px; border-radius: 6px; }
+  .input-lg { font-size: 16px; padding: 12px 16px; }
+
+  /* ---- SELECT ---- */
+  .select {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--gray-700);
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 8px 32px 8px 12px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23706E6D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .select:hover { border-color: var(--gray-300); }
+  .select:focus { outline: none; border-color: var(--blue-400); box-shadow: 0 0 0 2px var(--focus-ring); }
+
+  /* ---- TOGGLE ---- */
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--gray-300);
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition);
+    padding: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 9999px;
+    box-shadow: var(--shadow-2);
+    transition: transform var(--transition);
+  }
+  .toggle.active { background: var(--blue-400); }
+  .toggle.active::after { transform: translateX(20px); }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    box-shadow: var(--shadow-2);
+    padding: 24px;
+    transition: all var(--transition);
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-4);
+    transform: translateY(-1px);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-1000);
+    margin-bottom: 8px;
+  }
+  .card-text {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ---- ALERTS ---- */
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.46;
+    border: 1px solid;
+  }
+  .alert-info { background: var(--blue-0); border-color: var(--blue-50); color: var(--blue-700); }
+  .alert-success { background: var(--green-50); border-color: var(--green-200); color: var(--green-500); }
+  .alert-warning { background: var(--orange-50); border-color: var(--orange-400); color: var(--orange-400); }
+  .alert-error { background: var(--red-50); border-color: var(--red-200); color: var(--red-500); }
+
+  /* ---- AVATAR ---- */
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .avatar-sm { width: 24px; height: 24px; font-size: 11px; }
+  .avatar-lg { width: 48px; height: 48px; font-size: 18px; }
+  .avatar-xl { width: 64px; height: 64px; font-size: 24px; }
+
+  /* ---- TABS ---- */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 24px;
+  }
+  .tab {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-500);
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all var(--transition);
+  }
+  .tab:hover { color: var(--gray-700); }
+  .tab.active { color: var(--gray-1000); border-bottom-color: var(--gray-1000); }
+
+  /* ---- CHIP / TAG ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+  }
+  .chip-close {
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---- TABLE ---- */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-600);
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-700);
+  }
+  .table tr:hover td { background: var(--gray-50); }
+
+  /* ---- TOOLTIP ---- */
+  .tooltip-demo {
+    position: relative;
+    display: inline-block;
+  }
+  .tooltip-box {
+    background: var(--gray-1000);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: var(--shadow-4);
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-track {
+    width: 100%;
+    max-width: 320px;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+  }
+
+  /* ---- SKELETON ---- */
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: 32px 0;
+  }
+
+  /* ---- DARK SECTION ---- */
+  .dark-section {
+    background: var(--gray-900);
+    border-radius: 12px;
+    padding: 48px;
+    margin: 32px 0;
+  }
+  .dark-section h3 { color: var(--gray-300); }
+  .dark-section .card-title { color: #fff; }
+  .dark-section .card-text { color: var(--gray-400); }
+
+  /* ---- NAV BAR ---- */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    box-shadow: var(--shadow-2);
+    margin-bottom: 32px;
+  }
+  .nav-brand {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--gray-1000);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-500);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all var(--transition);
+  }
+  .nav-link:hover { color: var(--gray-700); background: var(--gray-100); }
+  .nav-link.active { color: var(--gray-1000); }
+
+  /* ---- LABEL ---- */
+  .label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .helper-text {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+  .error-text {
+    font-size: 12px;
+    color: var(--red-400);
+    margin-top: 4px;
+  }
+
+  /* ---- CHECKBOX / RADIO ---- */
+  .checkbox-row, .radio-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .checkbox-row input[type="checkbox"],
+  .radio-row input[type="radio"] {
+    accent-color: var(--blue-400);
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+
+  /* ---- COLOR SWATCHES ---- */
+  .swatch-row { display: flex; gap: 4px; margin-bottom: 8px; }
+  .swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+  }
+  .swatch-label {
+    font-size: 11px;
+    color: var(--gray-500);
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 24px 16px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .dark-section { padding: 24px; }
+    h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV BAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#181717"/><circle cx="12" cy="12" r="4" fill="#F9F7F6"/></svg>
+    tailscale
+  </div>
+  <div class="nav-links">
+    <a href="#" class="nav-link active">Dashboard</a>
+    <a href="#" class="nav-link">Machines</a>
+    <a href="#" class="nav-link">ACLs</a>
+    <a href="#" class="nav-link">DNS</a>
+    <a href="#" class="nav-link">Settings</a>
+  </div>
+  <button class="btn btn-primary btn-sm">Get Started</button>
+</nav>
+
+<h1>Tailscale Components</h1>
+<p class="subtitle">A living reference of UI elements styled to match Tailscale's design system.</p>
+
+<!-- COLOR SWATCHES -->
+<h2>Color Palette</h2>
+
+<h3>Grays</h3>
+<div class="swatch-row">
+  <div><div class="swatch" style="background:#F9F7F6"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background:#F7F5F4"></div><div class="swatch-label">100</div></div>
+  <div><div class="swatch" style="background:#EEEBEA"></div><div class="swatch-label">200</div></div>
+  <div><div class="swatch" style="background:#DAD6D5"></div><div class="swatch-label">300</div></div>
+  <div><div class="swatch" style="background:#AFACAB"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background:#706E6D"></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background:#444342"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background:#2E2D2D"></div><div class="swatch-label">700</div></div>
+  <div><div class="swatch" style="background:#232222"></div><div class="swatch-label">800</div></div>
+  <div><div class="swatch" style="background:#1F1E1E"></div><div class="swatch-label">900</div></div>
+  <div><div class="swatch" style="background:#181717"></div><div class="swatch-label">1000</div></div>
+</div>
+
+<h3>Blues</h3>
+<div class="swatch-row">
+  <div><div class="swatch" style="background:#F0F5FF"></div><div class="swatch-label">0</div></div>
+  <div><div class="swatch" style="background:#CEDEFD"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background:#5A82DE"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background:#4B70CC"></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background:#3F5DB3"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background:#324994"></div><div class="swatch-label">700</div></div>
+</div>
+
+<h3>Greens, Reds, Oranges, Purples</h3>
+<div class="swatch-row">
+  <div><div class="swatch" style="background:#CBF4C9"></div><div class="swatch-label">G50</div></div>
+  <div><div class="swatch" style="background:#33C27F"></div><div class="swatch-label">G200</div></div>
+  <div><div class="swatch" style="background:#09825D"></div><div class="swatch-label">G400</div></div>
+  <div><div class="swatch" style="background:#FFD3CF"></div><div class="swatch-label">R50</div></div>
+  <div><div class="swatch" style="background:#D04841"></div><div class="swatch-label">R400</div></div>
+  <div><div class="swatch" style="background:#F8E5B9"></div><div class="swatch-label">O50</div></div>
+  <div><div class="swatch" style="background:#BB5504"></div><div class="swatch-label">O400</div></div>
+  <div><div class="swatch" style="background:#EFDDFD"></div><div class="swatch-label">P50</div></div>
+  <div><div class="swatch" style="background:#995FC3"></div><div class="swatch-label">P400</div></div>
+</div>
+
+<!-- BUTTONS -->
+<h2>Buttons</h2>
+
+<h3>Variants</h3>
+<div class="row">
+  <button class="btn btn-primary">Primary</button>
+  <button class="btn btn-secondary">Secondary</button>
+  <button class="btn btn-ghost">Ghost</button>
+  <button class="btn btn-blue">Blue</button>
+  <button class="btn btn-danger">Danger</button>
+  <button class="btn btn-success">Success</button>
+</div>
+
+<h3>Outline Variants</h3>
+<div class="row">
+  <button class="btn btn-outline-blue">Outline Blue</button>
+  <button class="btn btn-outline-danger">Outline Danger</button>
+</div>
+
+<h3>Sizes</h3>
+<div class="row">
+  <button class="btn btn-primary btn-sm">Small</button>
+  <button class="btn btn-primary">Default</button>
+  <button class="btn btn-primary btn-lg">Large</button>
+  <button class="btn btn-primary btn-xl">Extra Large</button>
+</div>
+
+<h3>Pill Buttons</h3>
+<div class="row">
+  <button class="btn btn-primary btn-pill">Primary Pill</button>
+  <button class="btn btn-secondary btn-pill">Secondary Pill</button>
+  <button class="btn btn-blue btn-pill btn-sm">Small Pill</button>
+</div>
+
+<h3>With Icons</h3>
+<div class="row">
+  <button class="btn btn-primary">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Add Machine
+  </button>
+  <button class="btn btn-secondary">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Create Key
+  </button>
+  <button class="btn btn-danger">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Remove
+  </button>
+</div>
+
+<h3>Icon Only</h3>
+<div class="row">
+  <button class="btn btn-secondary btn-icon btn-sm">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <button class="btn btn-secondary btn-icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="4" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg>
+  </button>
+  <button class="btn btn-primary btn-icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <button class="btn btn-secondary btn-icon btn-lg">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<h3>Full Width</h3>
+<div style="max-width:400px;">
+  <button class="btn btn-primary btn-block" style="margin-bottom:8px;">Sign in with SSO</button>
+  <button class="btn btn-secondary btn-block">Continue with Email</button>
+</div>
+
+<h3>Disabled States</h3>
+<div class="row">
+  <button class="btn btn-primary" disabled>Primary</button>
+  <button class="btn btn-secondary" disabled>Secondary</button>
+  <button class="btn btn-blue" disabled>Blue</button>
+  <button class="btn btn-danger" disabled>Danger</button>
+</div>
+
+<!-- BADGES -->
+<h2>Badges</h2>
+<div class="row">
+  <span class="badge badge-gray">Default</span>
+  <span class="badge badge-blue">Info</span>
+  <span class="badge badge-green">Connected</span>
+  <span class="badge badge-red">Error</span>
+  <span class="badge badge-orange">Warning</span>
+  <span class="badge badge-purple">Beta</span>
+</div>
+<div class="row">
+  <span class="badge badge-green badge-pill">Online</span>
+  <span class="badge badge-red badge-pill">Offline</span>
+  <span class="badge badge-blue badge-pill">3 nodes</span>
+</div>
+
+<!-- FORM ELEMENTS -->
+<h2>Form Elements</h2>
+
+<h3>Text Inputs</h3>
+<div class="col" style="max-width:360px;">
+  <div>
+    <label class="label">Machine name</label>
+    <input class="input" type="text" placeholder="e.g. my-laptop">
+    <span class="helper-text">This will be the hostname on your tailnet.</span>
+  </div>
+  <div>
+    <label class="label">Auth key</label>
+    <input class="input" type="text" value="tskey-auth-k1234CNTRL-abcdef">
+  </div>
+  <div>
+    <label class="label">Error state</label>
+    <input class="input input-error" type="text" value="invalid-name!">
+    <span class="error-text">Machine names can only contain letters, numbers, and dashes.</span>
+  </div>
+  <div>
+    <label class="label">Small input</label>
+    <input class="input input-sm" type="text" placeholder="Search...">
+  </div>
+  <div>
+    <label class="label">Large input</label>
+    <input class="input input-lg" type="text" placeholder="Enter your email">
+  </div>
+</div>
+
+<h3>Select</h3>
+<div class="col" style="max-width:360px;">
+  <div>
+    <label class="label">Operating system</label>
+    <select class="select" style="width:100%;max-width:320px;">
+      <option>Linux</option>
+      <option>macOS</option>
+      <option>Windows</option>
+      <option>iOS</option>
+      <option>Android</option>
+    </select>
+  </div>
+</div>
+
+<h3>Checkboxes & Radios</h3>
+<div class="col" style="gap:8px;">
+  <label class="checkbox-row"><input type="checkbox" checked> Enable MagicDNS</label>
+  <label class="checkbox-row"><input type="checkbox"> Use Tailscale DNS for all queries</label>
+  <label class="checkbox-row"><input type="checkbox"> Accept subnet routes</label>
+</div>
+<div class="col" style="gap:8px; margin-top:16px;">
+  <label class="radio-row"><input type="radio" name="key-type" checked> Reusable</label>
+  <label class="radio-row"><input type="radio" name="key-type"> One-off</label>
+  <label class="radio-row"><input type="radio" name="key-type"> Pre-approved</label>
+</div>
+
+<h3>Toggles</h3>
+<div class="row">
+  <button class="toggle" onclick="this.classList.toggle('active')"></button>
+  <button class="toggle active" onclick="this.classList.toggle('active')"></button>
+  <span style="font-size:14px; color:var(--gray-500);">Click to toggle</span>
+</div>
+
+<!-- TABS -->
+<h2>Tabs</h2>
+<div class="tabs">
+  <button class="tab active">Overview</button>
+  <button class="tab">Machines</button>
+  <button class="tab">Users</button>
+  <button class="tab">Logs</button>
+  <button class="tab">Settings</button>
+</div>
+
+<!-- CHIPS -->
+<h2>Chips / Tags</h2>
+<div class="row">
+  <span class="chip">tag:server <button class="chip-close">&times;</button></span>
+  <span class="chip">tag:prod <button class="chip-close">&times;</button></span>
+  <span class="chip">tag:k8s <button class="chip-close">&times;</button></span>
+  <span class="chip">autogroup:admin</span>
+</div>
+
+<!-- CARDS -->
+<h2>Cards</h2>
+<div class="grid-3">
+  <div class="card card-hover">
+    <div class="card-title">my-laptop</div>
+    <div class="card-text">100.100.1.1</div>
+    <div style="margin-top:12px;"><span class="badge badge-green badge-pill">Connected</span></div>
+  </div>
+  <div class="card card-hover">
+    <div class="card-title">prod-server</div>
+    <div class="card-text">100.100.1.2</div>
+    <div style="margin-top:12px;"><span class="badge badge-green badge-pill">Connected</span></div>
+  </div>
+  <div class="card card-hover">
+    <div class="card-title">dev-vm</div>
+    <div class="card-text">100.100.1.3</div>
+    <div style="margin-top:12px;"><span class="badge badge-red badge-pill">Offline</span></div>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top:24px;">
+  <div class="card">
+    <div class="card-title">Subnet Routes</div>
+    <div class="card-text" style="margin-bottom:16px;">Expose your private network to your tailnet without installing Tailscale on every device.</div>
+    <button class="btn btn-primary btn-sm">Set up routes</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Exit Nodes</div>
+    <div class="card-text" style="margin-bottom:16px;">Route all your traffic through a specific machine on your tailnet for secure browsing.</div>
+    <button class="btn btn-secondary btn-sm">Configure</button>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<h2>Alerts</h2>
+<div class="col" style="gap:16px;">
+  <div class="alert alert-info">Your tailnet is using the default ACL policy. Consider customizing it for better security.</div>
+  <div class="alert alert-success">Machine "prod-server" has been successfully added to your tailnet.</div>
+  <div class="alert alert-warning">Your auth key expires in 3 days. Generate a new one to avoid disruptions.</div>
+  <div class="alert alert-error">Failed to connect to "dev-vm". The machine may be offline or unreachable.</div>
+</div>
+
+<!-- AVATARS -->
+<h2>Avatars</h2>
+<div class="row">
+  <div class="avatar avatar-sm" style="background:var(--blue-400);">A</div>
+  <div class="avatar" style="background:var(--green-400);">JD</div>
+  <div class="avatar avatar-lg" style="background:var(--purple-400);">MK</div>
+  <div class="avatar avatar-xl" style="background:var(--gray-700);">TS</div>
+</div>
+
+<!-- TABLE -->
+<h2>Table</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Machine</th>
+      <th>Address</th>
+      <th>OS</th>
+      <th>Last seen</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="font-weight:500;color:var(--gray-1000);">my-laptop</td>
+      <td><code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">100.100.1.1</code></td>
+      <td>macOS 15.2</td>
+      <td>Just now</td>
+      <td><span class="badge badge-green badge-pill">Connected</span></td>
+    </tr>
+    <tr>
+      <td style="font-weight:500;color:var(--gray-1000);">prod-server</td>
+      <td><code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">100.100.1.2</code></td>
+      <td>Ubuntu 24.04</td>
+      <td>2 min ago</td>
+      <td><span class="badge badge-green badge-pill">Connected</span></td>
+    </tr>
+    <tr>
+      <td style="font-weight:500;color:var(--gray-1000);">dev-vm</td>
+      <td><code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">100.100.1.3</code></td>
+      <td>Arch Linux</td>
+      <td>3 days ago</td>
+      <td><span class="badge badge-red badge-pill">Offline</span></td>
+    </tr>
+    <tr>
+      <td style="font-weight:500;color:var(--gray-1000);">phone</td>
+      <td><code style="font-size:13px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">100.100.1.4</code></td>
+      <td>iOS 18.1</td>
+      <td>5 hr ago</td>
+      <td><span class="badge badge-orange badge-pill">Idle</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- TOOLTIPS -->
+<h2>Tooltips</h2>
+<div class="row" style="gap:24px;">
+  <div class="tooltip-demo">
+    <div class="tooltip-box">This is a tooltip</div>
+  </div>
+  <div class="tooltip-demo">
+    <div class="tooltip-box">Copy to clipboard</div>
+  </div>
+  <div class="tooltip-demo">
+    <div class="tooltip-box">192.168.1.0/24</div>
+  </div>
+</div>
+
+<!-- PROGRESS BARS -->
+<h2>Progress Bars</h2>
+<div class="col" style="gap:16px;">
+  <div>
+    <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px;">Setup progress — 3/5 steps</div>
+    <div class="progress-track"><div class="progress-fill" style="width:60%;background:var(--blue-400);"></div></div>
+  </div>
+  <div>
+    <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px;">Storage — 82% used</div>
+    <div class="progress-track"><div class="progress-fill" style="width:82%;background:var(--orange-400);"></div></div>
+  </div>
+  <div>
+    <div style="font-size:13px;color:var(--gray-600);margin-bottom:4px;">Nodes online — 100%</div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%;background:var(--green-400);"></div></div>
+  </div>
+</div>
+
+<!-- LOADING SKELETONS -->
+<h2>Loading Skeletons</h2>
+<div class="card" style="max-width:400px;">
+  <div class="skeleton" style="width:40%;height:14px;margin-bottom:12px;"></div>
+  <div class="skeleton" style="width:100%;height:12px;margin-bottom:8px;"></div>
+  <div class="skeleton" style="width:80%;height:12px;margin-bottom:16px;"></div>
+  <div class="skeleton" style="width:30%;height:28px;border-radius:9999px;"></div>
+</div>
+
+<!-- DARK SECTION -->
+<div class="dark-section">
+  <h2 style="border-top:none;padding-top:0;color:#fff;">Dark Theme Components</h2>
+
+  <h3>Buttons on Dark</h3>
+  <div class="row">
+    <button class="btn" style="background:#fff;color:var(--gray-1000);border-color:#fff;">White Primary</button>
+    <button class="btn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,0.2);">Ghost Light</button>
+    <button class="btn btn-blue">Blue</button>
+  </div>
+
+  <h3 style="margin-top:24px;">Card on Dark</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:600px;">
+    <div class="card" style="background:var(--gray-800);border-color:var(--gray-700);">
+      <div class="card-title" style="color:#fff;">relay-node</div>
+      <div class="card-text">100.100.2.5</div>
+      <div style="margin-top:12px;"><span class="badge badge-green badge-pill">Connected</span></div>
+    </div>
+    <div class="card" style="background:var(--gray-800);border-color:var(--gray-700);">
+      <div class="card-title" style="color:#fff;">exit-node-eu</div>
+      <div class="card-text">100.100.2.6</div>
+      <div style="margin-top:12px;"><span class="badge badge-green badge-pill">Connected</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+<p style="text-align:center;font-size:13px;color:var(--gray-400);padding-bottom:48px;">
+  Built with Tailscale's design tokens. Font: Inter + MDIO. Warm grays on #F9F7F6.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+.wrap {
+  position: relative;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.btn:hover { background: var(--gray-100); }
+
+.dir {
+  display: flex;
+  transition: transform var(--transition);
+}
+.dirDesc { transform: rotate(180deg); }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(24,23,23,0.10);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 140px;
+  padding: 4px;
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background var(--transition);
+  text-align: left;
+}
+.option:hover { background: var(--gray-100); }
+.optionActive { color: var(--blue-400); }
+
+.check {
+  display: flex;
+  color: var(--blue-400);
+  transition: transform var(--transition);
+}
+.checkDesc { transform: rotate(180deg); }
