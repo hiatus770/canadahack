@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react'
 import styles from './CameraGrid.module.css'
-import { CAMERAS, LOCATIONS } from './data'
 import { IconWifi, IconBattery, IconMore } from './icons'
+import { getSnapshotUrl } from './api'
 
-function CameraCard({ camera, onSelect }) {
+function CameraCard({ camera, onSelect, snapshotTick }) {
   const isOffline = camera.status === 'offline'
   const [c1, c2] = camera.gradient
 
@@ -13,6 +14,17 @@ function CameraCard({ camera, onSelect }) {
         className={styles.feed}
         style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
       >
+        {/* Live stream image */}
+        {!isOffline && (
+          <img
+            src={getSnapshotUrl(camera.id, snapshotTick)}
+            alt={camera.name}
+            className={styles.streamImg}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+            loading="lazy"
+            decoding="async"
+          />
+        )}
         {/* Scanlines */}
         <div className={styles.scanlines} />
 
@@ -50,10 +62,18 @@ function CameraCard({ camera, onSelect }) {
   )
 }
 
-export default function CameraGrid({ activeTab, setActiveTab, onSelectCamera }) {
+export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera }) {
+  const [snapshotTick, setSnapshotTick] = useState(Date.now())
+
+  useEffect(() => {
+    // Grid cards use snapshots instead of full streams to keep dashboard responsive.
+    const id = setInterval(() => setSnapshotTick(Date.now()), 1200)
+    return () => clearInterval(id)
+  }, [])
+
   const filtered = activeTab === 'All'
-    ? CAMERAS
-    : CAMERAS.filter(c => c.location === activeTab)
+    ? cameras
+    : cameras.filter(c => c.location === activeTab)
 
   // Group by location
   const groups = {}
@@ -68,7 +88,7 @@ export default function CameraGrid({ activeTab, setActiveTab, onSelectCamera }) 
         {/* Tabs */}
         <div className={styles.tabBar}>
           <div className={styles.tabs}>
-            {LOCATIONS.map(loc => (
+            {locations.map(loc => (
               <button
                 key={loc}
                 className={`${styles.tab} ${activeTab === loc ? styles.tabActive : ''}`}
@@ -87,7 +107,7 @@ export default function CameraGrid({ activeTab, setActiveTab, onSelectCamera }) 
               <h2 className={styles.groupTitle}>{location}</h2>
               <div className={styles.grid}>
                 {cams.map(cam => (
-                  <CameraCard key={cam.id} camera={cam} onSelect={onSelectCamera} />
+                  <CameraCard key={cam.id} camera={cam} onSelect={onSelectCamera} snapshotTick={snapshotTick} />
                 ))}
               </div>
             </div>
