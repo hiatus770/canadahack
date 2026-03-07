@@ -61,17 +61,31 @@ func (h *Handlers) ListMachines(w http.ResponseWriter, r *http.Request) {
 	}
 	result := []MachineInfo{{Name: h.selfName, Shares: localShareNames, IsSelf: true}}
 
-	for _, m := range machines {
-		shares, err := h.dav.ListShares(m)
-		if err != nil {
-			log.Printf("Error listing shares for %s: %v", m, err)
-			shares = []string{}
-		}
-		if shares == nil {
-			shares = []string{}
-		}
-		result = append(result, MachineInfo{Name: m, Shares: shares})
+	// Fetch shares concurrently so slow/offline machines don't block
+	type machResult struct {
+		info MachineInfo
+		idx  int
 	}
+	ch := make(chan machResult, len(machines))
+	for i, m := range machines {
+		go func(idx int, name string) {
+			shares, err := h.dav.ListShares(name)
+			if err != nil {
+				log.Printf("Error listing shares for %s: %v", name, err)
+				shares = []string{}
+			}
+			if shares == nil {
+				shares = []string{}
+			}
+			ch <- machResult{MachineInfo{Name: name, Shares: shares, IsSelf: false}, idx}
+		}(i, m)
+	}
+	remotes := make([]MachineInfo, len(machines))
+	for range machines {
+		r := <-ch
+		remotes[r.idx] = r.info
+	}
+	result = append(result, remotes...)
 	jsonResp(w, result)
 }
 
@@ -438,9 +452,11 @@ func (h *Handlers) Storage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := stat.Blocks * uint64(stat.Bsize)
-	free := stat.Bfree * uint64(stat.Bsize)
-	used := total - free
-	percent := float64(used) / float64(total) * 100
+	avail := stat.Bavail * uint64(stat.Bsize)
+	used := total - (stat.Bfree * uint64(stat.Bsize))
+	// Match df: percent = used / (used + available)
+	usable := used + avail
+	percent := float64(used) / float64(usable) * 100
 
 	jsonResp(w, map[string]any{
 		"used":    used,

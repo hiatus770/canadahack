@@ -192,6 +192,13 @@
 }
 
 /* ── Profile ── */
+.notifEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
 .profileRow {
   display: flex;
   align-items: center;

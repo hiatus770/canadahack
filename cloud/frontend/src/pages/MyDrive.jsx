@@ -9,6 +9,14 @@ import { useSearch } from '../context/SearchContext'
 import { listAllFiles, listMachines } from '../api'
 import FileViewer from '../components/FileViewer'
 
+function formatBytes(bytes) {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
 const FOLDER_COLORS = [
   { fill: '#ADC7FC', stroke: '#5A82DE' },
   { fill: '#CBF4C9', stroke: '#33C27F' },
@@ -144,7 +152,9 @@ export default function MyDrive() {
           <div className={styles.statusDot} />
           Tailnet connected
         </div>
-        <span className={styles.statusText}>{files.length} files, {folders.length} folders across {machines.length} machines</span>
+        <span className={styles.statusText}>
+          {files.length} files, {folders.length} folders across {machines.length} machines &middot; {formatBytes(files.reduce((sum, f) => sum + (f.size || 0), 0))} total
+        </span>
         <span className={styles.statusRight}>Last synced: just now</span>
       </div>
 

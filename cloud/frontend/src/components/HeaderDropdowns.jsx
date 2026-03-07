@@ -1,6 +1,15 @@
 import styles from './HeaderDropdowns.module.css'
 import { useApp } from '../context/AppContext'
-import { AVATARS } from '../data/content'
+
+const ICON_COLORS = {
+  folder:  'var(--blue-400)',
+  upload:  'var(--green-400)',
+  comment: 'var(--purple-400)',
+  share:   'var(--orange-400)',
+  info:    'var(--gray-400)',
+  warning: '#BB5504',
+  error:   '#B22D30',
+}
 
 // ── Reusable shell ────────────────────────────────────────────────────────────
 
@@ -40,25 +49,29 @@ export function BellDropdown({ onClose }) {
 
   return (
     <Dropdown className={styles.dropdownMd}>
-      <DropHeader title="Notifications" action={{ label: 'Mark all read', onClick: markAllRead }} />
-      {notifications.map(n => (
-        <div
-          key={n.id}
-          className={`${styles.notifRow} ${n.unread ? styles.notifUnread : ''}`}
-          onClick={() => markRead(n.id)}
-        >
-          <div className={styles.notifAvatar} style={{ background: AVATARS[n.user]?.bg }}>
-            {n.user}
+      <DropHeader title="Notifications" action={notifications.length > 0 ? { label: 'Mark all read', onClick: markAllRead } : undefined} />
+      {notifications.length === 0 ? (
+        <div className={styles.notifEmpty}>No notifications yet</div>
+      ) : (
+        notifications.map(n => (
+          <div
+            key={n.id}
+            className={`${styles.notifRow} ${n.unread ? styles.notifUnread : ''}`}
+            onClick={() => markRead(n.id)}
+          >
+            <div className={styles.notifAvatar} style={{ background: ICON_COLORS[n.icon] || ICON_COLORS.info }}>
+              {n.icon === 'folder' ? '📁' : n.icon === 'upload' ? '📤' : n.icon === 'comment' ? '💬' : n.icon === 'share' ? '🔗' : n.icon === 'error' ? '⚠' : 'ℹ'}
+            </div>
+            <div className={styles.notifBody}>
+              <span className={styles.notifText}>{n.text}</span>
+              <span className={styles.notifWhen}>{n.when}</span>
+            </div>
+            {n.unread && <div className={styles.unreadDot} />}
           </div>
-          <div className={styles.notifBody}>
-            <span className={styles.notifText}><b>{n.user}</b> {n.text}</span>
-            <span className={styles.notifWhen}>{n.when}</span>
-          </div>
-          {n.unread && <div className={styles.unreadDot} />}
-        </div>
-      ))}
+        ))
+      )}
       <DropDivider />
-      <button className={styles.dropFooter} onClick={onClose}>View all notifications</button>
+      <button className={styles.dropFooter} onClick={onClose}>Dismiss</button>
     </Dropdown>
   )
 }

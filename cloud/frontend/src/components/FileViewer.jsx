@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import styles from './FileViewer.module.css'
 import { downloadFile, previewFile, whoami, getComments, addComment } from '../api'
 import { KIND_MAP } from './FileCard'
+import { useApp } from '../context/AppContext'
 
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp']
 
@@ -41,6 +42,7 @@ export default function FileViewer({ file, onClose }) {
   const [commentText, setCommentText] = useState('')
   const [comments, setComments] = useState([])
   const [user, setUser] = useState(null)
+  const { notify } = useApp()
 
   const ext = getExt(file.name)
   const isImage = IMAGE_EXTS.includes(ext)
@@ -98,6 +100,7 @@ export default function FileViewer({ file, onClose }) {
       .then(newComment => {
         setComments(prev => [newComment, ...prev])
         setCommentText('')
+        notify(`${author} commented on "${file.name}"`, 'comment')
       })
       .catch(err => console.error('Failed to post comment:', err))
   }

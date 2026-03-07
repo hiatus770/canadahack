@@ -3,9 +3,11 @@ package main
 import (
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/studio-b12/gowebdav"
 )
@@ -28,6 +30,10 @@ type FileEntry struct {
 
 func NewWebDAVClient(baseURL string) *WebDAVClient {
 	c := gowebdav.NewClient(baseURL, "", "")
+	c.SetTransport(&http.Transport{
+		ResponseHeaderTimeout: 5 * time.Second,
+		IdleConnTimeout:       10 * time.Second,
+	})
 	return &WebDAVClient{
 		baseURL: baseURL,
 		client:  c,
