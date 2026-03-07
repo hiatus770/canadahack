@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import styles from './ShareModal.module.css'
 import { createPublicShare } from '../api'
+import logo from '../assets/tailCloudLogo.svg'
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
@@ -66,6 +68,20 @@ export default function ShareModal({ file, onClose }) {
               <span className={styles.resultValue}>{result.url}</span>
               <CopyButton text={result.url} />
             </div>
+          </div>
+
+          <div className={styles.qrCode}>
+            <QRCodeSVG
+              value={result.url}
+              size={180}
+              level="H"
+              imageSettings={{
+                src: logo,
+                width: 40,
+                height: 40,
+                excavate: true,
+              }}
+            />
           </div>
 
           <div className={styles.resultSection}>

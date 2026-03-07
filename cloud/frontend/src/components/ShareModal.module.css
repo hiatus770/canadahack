@@ -197,6 +197,12 @@
 .btnCopy:hover { background: var(--gray-100); color: var(--gray-700); }
 .btnCopy.copied { background: var(--green-50); border-color: var(--green-200); color: var(--green-500); }
 
+.qrCode {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
 .warning {
   display: flex;
   align-items: flex-start;
