@@ -1,0 +1,25 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="0.5" width="499" height="499" rx="66.5" fill="#EDEBEA"/>
+<rect x="0.5" y="0.5" width="499" height="499" rx="66.5" stroke="black"/>
+<rect x="0.5" y="0.5" width="499" height="499" rx="66.5" stroke="black" stroke-opacity="0.2"/>
+<path d="M206.579 113.447L199.342 143.118L299.211 144.566L289.803 113.447H206.579Z" fill="#616263" stroke="black"/>
+<path d="M197.895 148.184L205.344 112H291.016L299.211 146.611" stroke="black" stroke-width="11"/>
+<rect x="91.9474" y="149.342" width="313.211" height="197.421" rx="9.5" fill="#616263" stroke="#1A1A1A" stroke-width="11"/>
+<path d="M400.526 256.737C415.482 247.57 446.842 221.421 452.632 190.158M95.8553 256.737C81.6228 249.259 52.2895 225.474 48.8158 190.158" stroke="black" stroke-width="11"/>
+<circle cx="249.276" cy="247.329" r="79.1711" fill="#1D1F23" stroke="black" stroke-width="11"/>
+<circle cx="215.923" cy="247.329" r="10.7909" fill="#FFFDFA"/>
+<circle cx="215.923" cy="213.975" r="10.7909" fill="#616263"/>
+<circle cx="249.276" cy="247.329" r="10.7909" fill="#FFFDFA"/>
+<circle cx="249.276" cy="213.975" r="10.7909" fill="#616263"/>
+<circle cx="215.923" cy="282.645" r="10.7909" fill="#616263"/>
+<circle cx="282.63" cy="247.329" r="10.7909" fill="#FFFDFA"/>
+<circle cx="282.63" cy="213.975" r="10.7909" fill="#616263"/>
+<circle cx="282.63" cy="282.645" r="10.7909" fill="#616263"/>
+<circle cx="249.276" cy="282.645" r="10.7909" fill="#FFFDFA"/>
+<ellipse cx="47.3684" cy="180.75" rx="17.3684" ry="20.9868" fill="#1A1A1A"/>
+<path d="M183.421 407.263L203.684 342.132" stroke="black" stroke-width="11"/>
+<ellipse cx="171.584" cy="405.816" rx="17.3684" ry="20.9868" transform="rotate(69.1504 171.584 405.816)" fill="#1A1A1A"/>
+<path d="M318.026 407.263L297.763 342.132" stroke="black" stroke-width="11"/>
+<ellipse cx="17.3684" cy="20.9868" rx="17.3684" ry="20.9868" transform="matrix(-0.355916 0.934518 0.934518 0.355916 316.433 382.115)" fill="#1A1A1A"/>
+<ellipse cx="452.632" cy="180.75" rx="17.3684" ry="20.9868" fill="#1A1A1A"/>
+</svg>

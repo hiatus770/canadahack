@@ -1,0 +1,18 @@
+.root {
+  height: 100%;
+  display: flex;
+}
+
+.shell {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
