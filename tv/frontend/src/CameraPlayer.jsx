@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './CameraPlayer.module.css'
 import {
   IconChevronLeft, IconChevronRight, IconChevronDown,
@@ -7,16 +7,21 @@ import {
   IconCloud, IconDownload, IconZoomIn, IconZoomOut,
   IconMic, IconCamera,
 } from './icons'
-import { CAMERAS, CLIP_TIMES } from './data'
+import { getStreamUrl, fetchClips, getClipDownloadUrl, sendCommand } from './api'
 
-export default function CameraPlayer({ camera, onBack }) {
+export default function CameraPlayer({ camera, cameras = [], onBack }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(30)
-  const [activeClip, setActiveClip] = useState(2)
+  const [activeClip, setActiveClip] = useState(0)
+  const [clips, setClips] = useState([])
 
-  const camIndex = CAMERAS.findIndex(c => c.id === camera.id)
-  const prevCam = CAMERAS[camIndex - 1] ?? null
-  const nextCam = CAMERAS[camIndex + 1] ?? null
+  useEffect(() => {
+    fetchClips(camera.id).then(setClips)
+  }, [camera.id])
+
+  const camIndex = cameras.findIndex(c => c.id === camera.id)
+  const prevCam = cameras[camIndex - 1] ?? null
+  const nextCam = cameras[camIndex + 1] ?? null
 
   const [c1, c2] = camera.gradient
 
@@ -51,6 +56,12 @@ export default function CameraPlayer({ camera, onBack }) {
           className={styles.video}
           style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
         >
+          {/* Live MJPEG stream */}
+          <img
+            src={getStreamUrl(camera.id, { fps: 8, quality: 60 })}
+            alt={camera.name}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, borderRadius: 'inherit' }}
+          />
           <div className={styles.scanlines} />
 
           {/* Top-left: signal icons */}
@@ -108,7 +119,7 @@ export default function CameraPlayer({ camera, onBack }) {
                 <button className={styles.ctrlBtn}><IconSkipForward size={16} /></button>
               </div>
               <div className={styles.ctrlRight}>
-                <button className={styles.liveBtn}>Live Video</button>
+                <button className={styles.liveBtn} onClick={() => sendCommand(camera.id, 'start_recording')}>Live Video</button>
                 <button className={styles.ctrlBtn}><IconCamera size={15} /></button>
                 <button className={styles.ctrlBtn}><IconFullscreen size={15} /></button>
               </div>
@@ -130,15 +141,17 @@ export default function CameraPlayer({ camera, onBack }) {
           <div className={styles.clipsStrip}>
             {/* Time labels */}
             <div className={styles.timeLabels}>
-              {CLIP_TIMES.map((t, i) => (
-                <div key={i} className={styles.timeLabel}>{t}</div>
+              {(clips.length > 0 ? clips : [{timestamp:''},{timestamp:''},{timestamp:''}]).map((clip, i) => (
+                <div key={i} className={styles.timeLabel}>
+                  {clip.timestamp ? new Date(clip.timestamp).toLocaleTimeString() : ''}
+                </div>
               ))}
             </div>
             {/* Clip thumbnails */}
             <div className={styles.clips}>
-              {CLIP_TIMES.map((t, i) => (
+              {(clips.length > 0 ? clips : [{id:'empty'}]).map((clip, i) => (
                 <div
-                  key={i}
+                  key={clip.id || i}
                   className={`${styles.clipGroup} ${activeClip === i ? styles.clipGroupActive : ''}`}
                   onClick={() => setActiveClip(i)}
                 >
@@ -146,14 +159,26 @@ export default function CameraPlayer({ camera, onBack }) {
                     className={styles.clipThumb}
                     style={{ background: `linear-gradient(160deg, ${camera.gradient[0]}, ${camera.gradient[1]})` }}
                   />
-                  <span className={styles.clipCount}>{[2,3,null,4,4][i] ? `${[2,3,1,4,4][i]} clips` : ''}</span>
-                  {activeClip === i && (
+                  <span className={styles.clipCount}>
+                    {clip.event_type || ''}
+                  </span>
+                  {activeClip === i && clip.id && clip.id !== 'empty' && (
                     <div className={styles.clipPopup}>
-                      <div className={styles.clipPopupTime}>{t}</div>
+                      <div className={styles.clipPopupTime}>
+                        {clip.timestamp ? new Date(clip.timestamp).toLocaleTimeString() : ''}
+                      </div>
                       <div
                         className={styles.clipPopupThumb}
                         style={{ background: `linear-gradient(160deg, ${camera.gradient[0]}, ${camera.gradient[1]})` }}
                       />
+                      <a
+                        href={getClipDownloadUrl(camera.id, clip.id)}
+                        download
+                        onClick={e => e.stopPropagation()}
+                        style={{ fontSize: '0.7rem', color: '#7eb8ff', marginTop: 4 }}
+                      >
+                        Download
+                      </a>
                     </div>
                   )}
                 </div>

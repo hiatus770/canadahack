@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailCam — Phone Camera</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a; color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 16px;
+  }
+  h1 { font-size: 1.2rem; margin-bottom: 12px; color: #7eb8ff; }
+  .status {
+    font-size: 0.85rem; padding: 6px 14px;
+    border-radius: 20px; margin-bottom: 12px;
+    background: #1a1a2e;
+  }
+  .status.connected { background: #0d2818; color: #4ade80; }
+  .status.error { background: #2d1215; color: #f87171; }
+  video {
+    width: 100%; max-width: 640px;
+    border-radius: 8px; background: #111;
+  }
+  canvas { display: none; }
+  .controls { margin-top: 16px; display: flex; gap: 10px; }
+  button {
+    padding: 10px 20px; border: none; border-radius: 8px;
+    font-size: 0.95rem; cursor: pointer;
+    background: #1e3a5f; color: #e0e0e0;
+    transition: background 0.2s;
+  }
+  button:hover { background: #2a5080; }
+  button.active { background: #065f46; color: #4ade80; }
+  .info { font-size: 0.75rem; color: #666; margin-top: 20px; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>TailCam — Phone Mode</h1>
+  <div class="status" id="status">Connecting…</div>
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+  <div class="controls">
+    <button id="btn-toggle" onclick="toggle()">Start Streaming</button>
+  </div>
+  <div class="info">This device streams its camera to TailCam.<br>Keep this page open.</div>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const statusEl = document.getElementById('status');
+  const btnToggle = document.getElementById('btn-toggle');
+
+  let streaming = false;
+  let ws = null;
+  const FPS = 10;
+  const QUALITY = 0.7;
+
+  async function initCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      video.srcObject = stream;
+      statusEl.textContent = 'Camera ready';
+      statusEl.className = 'status connected';
+    } catch (err) {
+      statusEl.textContent = 'Camera access denied';
+      statusEl.className = 'status error';
+    }
+  }
+
+  function toggle() {
+    if (streaming) {
+      stopStreaming();
+    } else {
+      startStreaming();
+    }
+  }
+
+  function startStreaming() {
+    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${wsProto}//${location.host}/ws/phone-feed`);
+    ws.binaryType = 'arraybuffer';
+    ws.onopen = () => {
+      streaming = true;
+      btnToggle.textContent = 'Stop Streaming';
+      btnToggle.classList.add('active');
+      statusEl.textContent = 'Streaming…';
+      statusEl.className = 'status connected';
+      sendFrame();
+    };
+    ws.onclose = () => {
+      streaming = false;
+      btnToggle.textContent = 'Start Streaming';
+      btnToggle.classList.remove('active');
+      statusEl.textContent = 'Disconnected';
+      statusEl.className = 'status';
+    };
+    ws.onerror = () => {
+      statusEl.textContent = 'Connection error';
+      statusEl.className = 'status error';
+    };
+  }
+
+  function stopStreaming() {
+    streaming = false;
+    if (ws) ws.close();
+    btnToggle.textContent = 'Start Streaming';
+    btnToggle.classList.remove('active');
+    statusEl.textContent = 'Camera ready';
+    statusEl.className = 'status connected';
+  }
+
+  function sendFrame() {
+    if (!streaming || !ws || ws.readyState !== WebSocket.OPEN) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      if (blob && ws.readyState === WebSocket.OPEN) {
+        ws.send(blob);
+      }
+      setTimeout(sendFrame, 1000 / FPS);
+    }, 'image/jpeg', QUALITY);
+  }
+
+  initCamera();
+</script>
+</body>
+</html>
