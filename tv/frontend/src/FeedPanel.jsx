@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import styles from './FeedPanel.module.css'
-import { IconFilter, IconMenu } from './icons'
 import { getClipThumbUrl } from './api'
 
 function toYMD(d) {
@@ -24,7 +23,9 @@ function getWeekDays() {
   return result
 }
 
-const WEEK_DAYS = getWeekDays()
+function getTodayYMD() {
+  return toYMD(new Date())
+}
 
 const alertGradients = {
   motion: ['#1e2a18','#141e10'],
@@ -34,7 +35,10 @@ const alertGradients = {
 }
 
 export default function FeedPanel({ alerts = [], onSelectClip }) {
-  const [selectedDate, setSelectedDate] = useState(WEEK_DAYS.find(d => d.today).fullDate)
+  const WEEK_DAYS = getWeekDays()
+  const [selectedDate, setSelectedDate] = useState(getTodayYMD)
+  const [viewed, setViewed] = useState(() => new Set())
+  const [readFilter, setReadFilter] = useState('all') // 'all' | 'unread' | 'read'
 
   const allEvents = alerts.map(a => ({
     id: a.id,
@@ -46,16 +50,29 @@ export default function FeedPanel({ alerts = [], onSelectClip }) {
     hasClip: typeof a.id === 'string' && a.id.includes('_'),
   }))
 
-  const feedEvents = allEvents.filter(e => e.dateStr === selectedDate)
+  const feedEvents = allEvents
+    .filter(e => e.dateStr === selectedDate)
+    .filter(e => {
+      if (readFilter === 'unread') return !viewed.has(e.id)
+      if (readFilter === 'read') return viewed.has(e.id)
+      return true
+    })
 
   return (
     <aside className={styles.panel}>
       {/* Header */}
       <div className={styles.header}>
         <span className={styles.title}>Feed</span>
-        <div className={styles.actions}>
-          <button className={styles.iconBtn}><IconFilter size={16} /></button>
-          <button className={styles.iconBtn}><IconMenu size={16} /></button>
+        <div className={styles.filterBtns}>
+          {['all', 'unread', 'read'].map(f => (
+            <button
+              key={f}
+              className={`${styles.filterBtn} ${readFilter === f ? styles.filterBtnActive : ''}`}
+              onClick={() => setReadFilter(f)}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -88,9 +105,14 @@ export default function FeedPanel({ alerts = [], onSelectClip }) {
             <div
               key={e.id}
               className={`${styles.eventRow} ${e.hasClip ? styles.eventRowClickable : ''}`}
-              onClick={() => e.hasClip && onSelectClip?.(e)}
+              onClick={() => {
+                if (e.hasClip) {
+                  setViewed(prev => new Set(prev).add(e.id))
+                  onSelectClip?.(e)
+                }
+              }}
             >
-              <div className={styles.dot} />
+              <div className={`${styles.dot} ${viewed.has(e.id) ? styles.dotViewed : ''}`} />
               {e.hasClip ? (
                 <img
                   src={getClipThumbUrl(null, e.id)}

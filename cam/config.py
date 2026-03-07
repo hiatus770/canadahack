@@ -30,7 +30,7 @@ MOTION_SCALE = float(os.environ.get("MOTION_SCALE", "0.5"))
 CLIP_DURATION = int(os.environ.get("CLIP_DURATION", "10"))  # seconds per clip
 CLIPS_DIR = Path(os.environ.get("CLIPS_DIR", "./clips"))
 CLIPS_DIR.mkdir(parents=True, exist_ok=True)
-MAX_CLIPS = int(os.environ.get("MAX_CLIPS", "100"))
+MAX_CLIPS = int(os.environ.get("MAX_CLIPS", "1000"))
 
 # Server settings
 HOST = os.environ.get("CAM_HOST", "0.0.0.0")

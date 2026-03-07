@@ -2,9 +2,22 @@ import cv2
 import threading
 import time
 import os
+import subprocess
+import tempfile
+import wave
+import numpy as np
 from datetime import datetime
 from pathlib import Path
 import config
+
+try:
+    import sounddevice as sd
+    _AUDIO_AVAILABLE = True
+except Exception:
+    _AUDIO_AVAILABLE = False
+
+AUDIO_SAMPLE_RATE = 44100
+AUDIO_CHANNELS = 1
 
 class ClipRecorder:
     """Records short video clips when triggered."""
@@ -28,8 +41,26 @@ class ClipRecorder:
                 "size": stat.st_size,
             })
 
+    def _record_audio(self, duration: float, wav_path: str):
+        """Record audio to a WAV file."""
+        try:
+            frames = sd.rec(
+                int(duration * AUDIO_SAMPLE_RATE),
+                samplerate=AUDIO_SAMPLE_RATE,
+                channels=AUDIO_CHANNELS,
+                dtype='int16',
+            )
+            sd.wait()
+            with wave.open(wav_path, 'wb') as wf:
+                wf.setnchannels(AUDIO_CHANNELS)
+                wf.setsampwidth(2)  # int16 = 2 bytes
+                wf.setframerate(AUDIO_SAMPLE_RATE)
+                wf.writeframes(frames.tobytes())
+        except Exception:
+            pass
+
     def record_clip(self, get_frame_fn, event_type: str = "motion") -> dict | None:
-        """Record a clip of CLIP_DURATION seconds. Returns clip metadata."""
+        """Record a clip of CLIP_DURATION seconds with audio. Returns clip metadata."""
         with self._lock:
             if self._recording:
                 return None
@@ -40,6 +71,10 @@ class ClipRecorder:
             filename = f"{clip_id}.mp4"
             filepath = config.CLIPS_DIR / filename
 
+            # Temp files for video-only and audio
+            tmp_video = str(filepath) + ".tmp.mp4"
+            tmp_audio = str(filepath) + ".tmp.wav"
+
             # Get first frame to determine size
             frame = get_frame_fn()
             if frame is None:
@@ -47,7 +82,16 @@ class ClipRecorder:
             h, w = frame.shape[:2]
 
             fourcc = cv2.VideoWriter_fourcc(*'avc1')
-            writer = cv2.VideoWriter(str(filepath), fourcc, config.FPS, (w, h))
+            writer = cv2.VideoWriter(tmp_video, fourcc, config.FPS, (w, h))
+
+            # Start audio recording in parallel
+            if _AUDIO_AVAILABLE:
+                audio_thread = threading.Thread(
+                    target=self._record_audio,
+                    args=(config.CLIP_DURATION, tmp_audio),
+                    daemon=True,
+                )
+                audio_thread.start()
 
             start = time.time()
             while time.time() - start < config.CLIP_DURATION:
@@ -57,6 +101,37 @@ class ClipRecorder:
                 time.sleep(1.0 / config.FPS)
 
             writer.release()
+
+            if _AUDIO_AVAILABLE:
+                audio_thread.join(timeout=config.CLIP_DURATION + 2)
+
+            # Mux video + audio with ffmpeg if audio was recorded
+            if _AUDIO_AVAILABLE and os.path.exists(tmp_audio):
+                try:
+                    subprocess.run(
+                        [
+                            'ffmpeg', '-y',
+                            '-i', tmp_video,
+                            '-i', tmp_audio,
+                            '-c:v', 'copy',
+                            '-c:a', 'aac',
+                            '-shortest',
+                            str(filepath),
+                        ],
+                        capture_output=True,
+                        timeout=30,
+                    )
+                except Exception:
+                    # Fallback: just use video without audio
+                    os.rename(tmp_video, str(filepath))
+                finally:
+                    for f in [tmp_video, tmp_audio]:
+                        try:
+                            os.remove(f)
+                        except OSError:
+                            pass
+            else:
+                os.rename(tmp_video, str(filepath))
 
             meta = {
                 "id": clip_id,
@@ -68,7 +143,6 @@ class ClipRecorder:
                 "size": filepath.stat().st_size,
             }
             self._clips.append(meta)
-            self._enforce_max_clips()
             return meta
 
         finally:

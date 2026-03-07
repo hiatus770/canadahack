@@ -2,7 +2,7 @@ import styles from './CameraGrid.module.css'
 import { IconWifi, IconBattery, IconMore } from './icons'
 import { getStreamUrl } from './api'
 
-function CameraCard({ camera, onSelect }) {
+function CameraCard({ camera, clipCount, onSelect }) {
   const isOffline = camera.status === 'offline'
   const [c1, c2] = camera.gradient
 
@@ -32,8 +32,8 @@ function CameraCard({ camera, onSelect }) {
             <IconBattery size={15} />
           </div>
           <div className={styles.topRight}>
-            {!isOffline && camera.motion > 0 && (
-              <span className={styles.motionBadge}>{camera.motion}</span>
+            {!isOffline && clipCount > 0 && (
+              <span className={styles.motionBadge}>{clipCount}</span>
             )}
             <button className={styles.moreBtn} onClick={e => e.stopPropagation()}>
               <IconMore size={14} />
@@ -59,7 +59,7 @@ function CameraCard({ camera, onSelect }) {
   )
 }
 
-export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera }) {
+export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera, clipCounts = {} }) {
   const filtered = activeTab === 'All'
     ? cameras
     : cameras.filter(c => c.location === activeTab)
@@ -96,7 +96,7 @@ export default function CameraGrid({ cameras, locations, activeTab, setActiveTab
               <h2 className={styles.groupTitle}>{location}</h2>
               <div className={styles.grid}>
                 {cams.map(cam => (
-                  <CameraCard key={cam.id} camera={cam} onSelect={onSelectCamera} />
+                  <CameraCard key={cam.id} camera={cam} clipCount={clipCounts[cam.id] ?? 0} onSelect={onSelectCamera} />
                 ))}
               </div>
             </div>

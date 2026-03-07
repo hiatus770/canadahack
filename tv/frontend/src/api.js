@@ -24,7 +24,7 @@ export async function fetchAlerts(limit = 50, cameraId = null) {
   const status = statusRes.ok ? await statusRes.json() : {}
   const cameraName = status.name || 'Camera'
 
-  return clips.reverse().slice(0, limit).map(c => {
+  return clips.reverse().map(c => {
     // Extract event type from clip id: e.g. "20260307_154350_person" → "person"
     const parts = (c.id || '').split('_')
     const rawType = parts[parts.length - 1] || 'motion'

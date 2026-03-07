@@ -33,7 +33,7 @@ export default function App() {
   }, [])
 
   const loadAlerts = useCallback(async () => {
-    const a = await fetchAlerts(50)
+    const a = await fetchAlerts()
     setAlerts(a)
   }, [])
 
@@ -50,6 +50,13 @@ export default function App() {
 
   // Compute locations from live cameras
   const locations = ['All', ...new Set(cameras.map(c => c.location))]
+
+  // Clip counts per camera
+  const clipCounts = alerts.reduce((acc, a) => {
+    const id = a.camera_id || cameras[0]?.id
+    if (id) acc[id] = (acc[id] || 0) + 1
+    return acc
+  }, {})
 
   return (
     <div className={styles.root}>
@@ -72,6 +79,7 @@ export default function App() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onSelectCamera={setSelectedCamera}
+            clipCounts={clipCounts}
           />
         )}
       </div>
