@@ -314,6 +314,7 @@ func (h *Handlers) Upload(w http.ResponseWriter, r *http.Request) {
 }
 
 // POST /api/mkdir?path=... — create directory
+// Detects share-level creation on local machine and auto-creates a Tailscale share
 func (h *Handlers) MkDir(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Query().Get("path")
 	if p == "" {
@@ -321,7 +322,37 @@ func (h *Handlers) MkDir(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	parts := strings.SplitN(strings.TrimPrefix(p, "/"), "/", 3)
+	machine := parts[0]
+	isShareLevel := len(parts) == 2 // /machine/name — no deeper path
+
 	if h.isLocalPath(p) {
+		if isShareLevel {
+			// Creating at share level on local machine — auto-create a Tailscale share
+			shareName := parts[1]
+
+			// Create directory at ~/Shares/<name>
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				jsonErr(w, fmt.Sprintf("cannot find home dir: %v", err), 500)
+				return
+			}
+			sharePath := filepath.Join(homeDir, "Shares", shareName)
+			if err := os.MkdirAll(sharePath, 0755); err != nil {
+				jsonErr(w, fmt.Sprintf("mkdir failed: %v", err), 500)
+				return
+			}
+
+			// Register as a Tailscale drive share
+			if err := CreateLocalShare(shareName, sharePath); err != nil {
+				jsonErr(w, fmt.Sprintf("create share failed: %v", err), 500)
+				return
+			}
+			log.Printf("Auto-created share %q at %s", shareName, sharePath)
+			jsonResp(w, map[string]string{"created": p, "share": shareName, "path": sharePath})
+			return
+		}
+
 		shares, _ := ListLocalShares()
 		fsPath := ResolveLocalPath(p, h.selfName, shares)
 		if fsPath == "" {
@@ -333,6 +364,10 @@ func (h *Handlers) MkDir(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		if isShareLevel {
+			jsonErr(w, fmt.Sprintf("cannot create shares on remote machine %q — only the machine owner can do that", machine), 400)
+			return
+		}
 		if err := h.dav.MkDir(p); err != nil {
 			jsonErr(w, fmt.Sprintf("mkdir failed: %v", err), 500)
 			return

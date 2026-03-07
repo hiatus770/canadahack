@@ -92,6 +92,12 @@
   white-space: nowrap;
 }
 
+.modalDesc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
 .modalFooter {
   display: flex;
   justify-content: flex-end;

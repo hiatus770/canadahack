@@ -31,6 +31,14 @@ export default function NewDropdown({ onClose }) {
   const [selectedPath, setSelectedPath] = useState(null)
   const [pickerStep, setPickerStep] = useState(null) // null | 'machine' | 'share'
   const [loadingShares, setLoadingShares] = useState(false)
+  const [isSelfMachine, setIsSelfMachine] = useState(false)
+
+  // Detect if selectedPath is machine-level (creating a share, not a subfolder)
+  function isShareLevel(path) {
+    if (!path) return false
+    const parts = path.replace(/^\//, '').split('/')
+    return parts.length === 1 // just /machinename
+  }
 
   function getCurrentPath() {
     const params = new URLSearchParams(location.search)
@@ -58,6 +66,7 @@ export default function NewDropdown({ onClose }) {
   }
 
   function handlePickMachine(machine) {
+    setIsSelfMachine(!!machine.isSelf)
     // Load shares for this machine
     setLoadingShares(true)
     listFiles('/' + machine.name)
@@ -102,9 +111,15 @@ export default function NewDropdown({ onClose }) {
     setCreating(true)
     setError('')
 
+    const creatingShare = isShareLevel(target)
+
     try {
       await createFolder(target.replace(/\/$/, '') + '/' + folderName.trim())
-      notify(`Created folder "${folderName.trim()}"`, 'folder')
+      if (creatingShare) {
+        notify(`Created share "${folderName.trim()}"`, 'share')
+      } else {
+        notify(`Created folder "${folderName.trim()}"`, 'folder')
+      }
       onClose()
       window.location.reload()
     } catch (err) {
@@ -191,24 +206,46 @@ export default function NewDropdown({ onClose }) {
 
   // ── Folder name modal ──
   if (mode === 'folder' && selectedPath && !pickerStep) {
+    const creatingShare = isShareLevel(selectedPath)
+    const isRemoteShare = creatingShare && !isSelfMachine && !currentPath
+
+    if (isRemoteShare) {
+      return (
+        <ModalOverlay onClose={onClose}>
+          <div className={styles.modalTitle}>Cannot create share</div>
+          <div className={styles.modalDesc}>
+            Shares can only be created on your own machine. Pick a different machine or select an existing share.
+          </div>
+          <div className={styles.modalFooter}>
+            <button className={styles.folderCancel} onClick={() => setPickerStep('machine')}>Back</button>
+            <button className={styles.folderCancel} onClick={onClose}>Cancel</button>
+          </div>
+        </ModalOverlay>
+      )
+    }
+
     return (
       <ModalOverlay onClose={onClose}>
         <form onSubmit={handleCreateFolder} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className={styles.modalTitle}>New folder</div>
-          <div className={styles.modalPath}>in {selectedPath}</div>
+          <div className={styles.modalTitle}>{creatingShare ? 'New share' : 'New folder'}</div>
+          <div className={styles.modalPath}>
+            {creatingShare
+              ? `Creates a new Tailscale Drive share on ${selectedPath.replace(/^\//, '')}`
+              : `in ${selectedPath}`}
+          </div>
           <input
             className={styles.folderInput}
             type="text"
             value={folderName}
             onChange={e => setFolderName(e.target.value)}
-            placeholder="Folder name"
+            placeholder={creatingShare ? 'Share name' : 'Folder name'}
             autoFocus
           />
           {error && <div className={styles.folderError}>{error}</div>}
           <div className={styles.modalFooter}>
             <button type="button" className={styles.folderCancel} onClick={onClose}>Cancel</button>
             <button type="submit" className={styles.folderSubmit} disabled={!folderName.trim() || creating}>
-              {creating ? 'Creating...' : 'Create'}
+              {creating ? 'Creating...' : creatingShare ? 'Create share' : 'Create'}
             </button>
           </div>
         </form>
