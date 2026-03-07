@@ -1,4 +1,4 @@
-module tailstorm-backend
+module tailcloud-backend
 
 go 1.25.0
 

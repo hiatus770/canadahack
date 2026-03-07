@@ -7,10 +7,11 @@ import { useSearch } from '../context/SearchContext'
 import { useApp } from '../context/AppContext'
 import { listMachines, getStorage, whoami } from '../api'
 import {
-  IconDiamond, IconSearch, IconBell,
+  IconSearch, IconBell,
   IconPlus, IconHome, IconClock,
   IconServer, IconTrash,
 } from './icons'
+import tailCloudLogo from '../assets/tailCloudLogo.svg'
 
 const NAV_MAIN = [
   { label: 'My Drive',       to: '/drive',   Icon: IconHome,   matchPrefix: '/drive' },
@@ -73,9 +74,9 @@ export default function Layout() {
       {/* ── HEADER ── */}
       <header className={styles.header}>
         <Link to="/drive" className={styles.brand}>
-          <div className={styles.brandIcon}><IconDiamond /></div>
+          <img src={tailCloudLogo} alt="TailCloud" className={styles.brandLogo} />
           <span className={styles.brandName}>
-            Tailstorm <span className={styles.brandSub}>Drive</span>
+            tailcloud
           </span>
         </Link>
 
@@ -183,7 +184,6 @@ export default function Layout() {
             <div className={styles.storageUsed}>
               {storage ? `${formatBytes(storage.used)} of ${formatBytes(storage.total)} used` : 'Loading...'}
             </div>
-            <button className={styles.storageUpgrade}>Get more storage</button>
           </div>
         </aside>
 

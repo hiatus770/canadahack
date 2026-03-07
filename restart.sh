@@ -1,12 +1,12 @@
 #!/bin/bash
 # Kill existing processes
-pkill -f tailstorm-backend 2>/dev/null
+pkill -f tailcloud-backend 2>/dev/null
 pkill -f "node.*vite" 2>/dev/null
 sleep 1
 
 # Rebuild and start backend
 cd /home/hiatus/Hackathons/canadahack/cloud/backend
-go build -o tailstorm-backend . && ./tailstorm-backend > /tmp/tailstorm-backend.log 2>&1 &
+go build -o tailcloud-backend . && ./tailcloud-backend > /tmp/tailcloud-backend.log 2>&1 &
 echo "Backend started (PID $!)"
 
 # Start frontend

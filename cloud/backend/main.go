@@ -84,6 +84,6 @@ func main() {
 	mux.HandleFunc("GET /api/comments", h.GetComments)
 	mux.HandleFunc("POST /api/comments", h.AddComment)
 
-	log.Printf("Tailstorm backend listening on %s", listenAddr)
+	log.Printf("TailCloud backend listening on %s", listenAddr)
 	log.Fatal(http.ListenAndServe(listenAddr, cors(mux)))
 }

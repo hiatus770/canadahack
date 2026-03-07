@@ -29,15 +29,12 @@
   text-decoration: none;
 }
 
-.brandIcon {
+.brandLogo {
   width: 32px;
   height: 32px;
-  background: var(--gray-1000);
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 .brandName {
