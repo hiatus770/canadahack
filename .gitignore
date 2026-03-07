@@ -21,6 +21,10 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw?n
 
 .vite
+
+*__pycache__*
+*venv*
+*clips*

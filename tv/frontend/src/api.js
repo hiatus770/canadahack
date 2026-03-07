@@ -1,27 +1,46 @@
-const API_BASE = '/api'
+// The cam backend is a single-camera server.
+// These helpers map the multi-camera frontend API to the actual backend routes.
 
 export async function fetchCameras() {
-  const res = await fetch(`${API_BASE}/cameras`)
+  const res = await fetch('/api/status')
   if (!res.ok) return []
-  return res.json()
+  const cam = await res.json()
+  return [cam]
 }
 
 export async function fetchCamera(camId) {
-  const res = await fetch(`${API_BASE}/cameras/${camId}`)
+  const res = await fetch('/api/status')
   if (!res.ok) return null
   return res.json()
 }
 
 export async function fetchAlerts(limit = 50, cameraId = null) {
-  const params = new URLSearchParams({ limit })
-  if (cameraId) params.set('camera_id', cameraId)
-  const res = await fetch(`${API_BASE}/alerts?${params}`)
-  if (!res.ok) return []
-  return res.json()
+  const [clipsRes, statusRes] = await Promise.all([
+    fetch('/api/clips'),
+    fetch('/api/status'),
+  ])
+  if (!clipsRes.ok) return []
+  const clips = await clipsRes.json()
+  const status = statusRes.ok ? await statusRes.json() : {}
+  const cameraName = status.name || 'Camera'
+
+  return clips.reverse().slice(0, limit).map(c => {
+    // Extract event type from clip id: e.g. "20260307_154350_person" → "person"
+    const parts = (c.id || '').split('_')
+    const rawType = parts[parts.length - 1] || 'motion'
+    const type = rawType.charAt(0).toUpperCase() + rawType.slice(1)
+    return {
+      id: c.id,
+      camera_name: cameraName,
+      type: rawType,
+      event_type: type,
+      timestamp: c.timestamp,
+    }
+  })
 }
 
 export async function fetchClips(camId) {
-  const res = await fetch(`${API_BASE}/cameras/${camId}/clips`)
+  const res = await fetch('/api/clips')
   if (!res.ok) return []
   return res.json()
 }
@@ -31,20 +50,24 @@ export function getStreamUrl(camId, options = {}) {
   if (options.fps) params.set('fps', String(options.fps))
   if (options.quality) params.set('quality', String(options.quality))
   const query = params.toString()
-  return `${API_BASE}/cameras/${camId}/stream${query ? `?${query}` : ''}`
+  return `/api/stream${query ? `?${query}` : ''}`
 }
 
 export function getSnapshotUrl(camId, tick = null) {
   const suffix = tick === null ? '' : `?t=${tick}`
-  return `${API_BASE}/cameras/${camId}/snapshot${suffix}`
+  return `/api/snapshot${suffix}`
 }
 
 export function getClipDownloadUrl(camId, clipId) {
-  return `${API_BASE}/cameras/${camId}/clips/${clipId}`
+  return `/api/clips/${clipId}`
+}
+
+export function getClipThumbUrl(camId, clipId) {
+  return `/api/clips/${clipId}/thumb`
 }
 
 export async function sendCommand(camId, command) {
-  const res = await fetch(`${API_BASE}/cameras/${camId}/command`, {
+  const res = await fetch('/api/command', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ command }),
@@ -53,13 +76,9 @@ export async function sendCommand(camId, command) {
   return res.json()
 }
 
-/**
- * Connect to the real-time alert WebSocket.
- * Returns a cleanup function.
- */
 export function connectAlertWS(onAlert) {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-  const ws = new WebSocket(`${proto}//${location.host}/api/ws`)
+  const ws = new WebSocket(`${proto}//localhost:8000/api/ws`)
 
   ws.onmessage = (event) => {
     try {
@@ -69,7 +88,6 @@ export function connectAlertWS(onAlert) {
   }
 
   ws.onclose = () => {
-    // Auto-reconnect after 3s
     setTimeout(() => connectAlertWS(onAlert), 3000)
   }
 

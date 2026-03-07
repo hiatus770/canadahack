@@ -1,23 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import styles from './CameraPlayer.module.css'
 import {
-  IconChevronLeft, IconChevronRight, IconChevronDown,
+  IconChevronLeft, IconChevronRight,
   IconPlay, IconPause, IconSkipBack, IconSkipForward,
   IconRewind, IconFastForward, IconVolume, IconFullscreen,
-  IconCloud, IconDownload, IconZoomIn, IconZoomOut,
   IconMic, IconCamera,
 } from './icons'
-import { getStreamUrl, fetchClips, getClipDownloadUrl, sendCommand } from './api'
+import { getStreamUrl, getClipDownloadUrl } from './api'
 
-export default function CameraPlayer({ camera, cameras = [], onBack }) {
+export default function CameraPlayer({ camera, cameras = [], selectedClip, onClearClip, onBack }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(30)
-  const [activeClip, setActiveClip] = useState(0)
-  const [clips, setClips] = useState([])
-
-  useEffect(() => {
-    fetchClips(camera.id).then(setClips)
-  }, [camera.id])
+  const isLive = !selectedClip
 
   const camIndex = cameras.findIndex(c => c.id === camera.id)
   const prevCam = cameras[camIndex - 1] ?? null
@@ -27,18 +21,8 @@ export default function CameraPlayer({ camera, cameras = [], onBack }) {
 
   return (
     <div className={styles.wrapper}>
-      {/* Scrollable */}
       <div className={styles.scrollArea}>
       <div className={styles.cardOuter}>
-        {/* Tab bar */}
-        <div className={styles.tabBar}>
-          <div className={styles.tabs}>
-            {['All Events', 'Doorbell Call', 'Intelligent Detection'].map((t, i) => (
-              <button key={t} className={`${styles.tab} ${i === 0 ? styles.tabActive : ''}`}>{t}</button>
-            ))}
-          </div>
-        </div>
-
         {/* Nav row */}
         <div className={styles.navRow}>
           <button className={styles.backBtn} onClick={onBack}>
@@ -50,18 +34,34 @@ export default function CameraPlayer({ camera, cameras = [], onBack }) {
             </button>
           </div>
         </div>
-        <div className={styles.cardInner}>
+
         {/* Main video */}
         <div
           className={styles.video}
           style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
         >
-          {/* Live MJPEG stream */}
+          {/* Live MJPEG stream — always in DOM to keep cam connection alive */}
           <img
             src={getStreamUrl(camera.id, { fps: 8, quality: 60 })}
             alt={camera.name}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, borderRadius: 'inherit' }}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', zIndex: 0, borderRadius: 'inherit',
+              opacity: isLive ? 1 : 0,
+            }}
           />
+          {/* Clip playback */}
+          {!isLive && (
+            <video
+              key={selectedClip.id}
+              src={getClipDownloadUrl(camera.id, selectedClip.id)}
+              autoPlay
+              muted
+              loop
+              controls
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1, borderRadius: 'inherit' }}
+            />
+          )}
           <div className={styles.scanlines} />
 
           {/* Top-left: signal icons */}
@@ -94,7 +94,9 @@ export default function CameraPlayer({ camera, cameras = [], onBack }) {
           <div className={styles.bottomOverlay}>
             <div className={styles.videoInfo}>
               <div className={styles.videoName}>{camera.location}: {camera.name}</div>
-              <div className={styles.videoDate}>{camera.date}   {camera.lastSeen}</div>
+              <div className={styles.videoDate}>
+                {isLive ? `${camera.date}   ${camera.lastSeen}` : `${selectedClip.type} · ${selectedClip.time}`}
+              </div>
             </div>
             <input
               type="range"
@@ -119,85 +121,13 @@ export default function CameraPlayer({ camera, cameras = [], onBack }) {
                 <button className={styles.ctrlBtn}><IconSkipForward size={16} /></button>
               </div>
               <div className={styles.ctrlRight}>
-                <button className={styles.liveBtn} onClick={() => sendCommand(camera.id, 'start_recording')}>Live Video</button>
+                <button className={`${styles.liveBtn} ${isLive ? styles.liveBtnActive : ''}`} onClick={onClearClip}>Live Video</button>
                 <button className={styles.ctrlBtn}><IconCamera size={15} /></button>
                 <button className={styles.ctrlBtn}><IconFullscreen size={15} /></button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Timeline */}
-        <div className={styles.timeline}>
-          <div className={styles.timelineHeader}>
-            <button className={styles.todayBtn}>Today <IconChevronDown size={12} /></button>
-            <div className={styles.timelineActions}>
-              <button className={styles.timelineBtn}><IconCloud size={15} /></button>
-              <button className={styles.timelineBtn}><IconDownload size={15} /></button>
-            </div>
-          </div>
-
-          {/* Clips strip */}
-          <div className={styles.clipsStrip}>
-            {/* Time labels */}
-            <div className={styles.timeLabels}>
-              {(clips.length > 0 ? clips : [{timestamp:''},{timestamp:''},{timestamp:''}]).map((clip, i) => (
-                <div key={i} className={styles.timeLabel}>
-                  {clip.timestamp ? new Date(clip.timestamp).toLocaleTimeString() : ''}
-                </div>
-              ))}
-            </div>
-            {/* Clip thumbnails */}
-            <div className={styles.clips}>
-              {(clips.length > 0 ? clips : [{id:'empty'}]).map((clip, i) => (
-                <div
-                  key={clip.id || i}
-                  className={`${styles.clipGroup} ${activeClip === i ? styles.clipGroupActive : ''}`}
-                  onClick={() => setActiveClip(i)}
-                >
-                  <div
-                    className={styles.clipThumb}
-                    style={{ background: `linear-gradient(160deg, ${camera.gradient[0]}, ${camera.gradient[1]})` }}
-                  />
-                  <span className={styles.clipCount}>
-                    {clip.event_type || ''}
-                  </span>
-                  {activeClip === i && clip.id && clip.id !== 'empty' && (
-                    <div className={styles.clipPopup}>
-                      <div className={styles.clipPopupTime}>
-                        {clip.timestamp ? new Date(clip.timestamp).toLocaleTimeString() : ''}
-                      </div>
-                      <div
-                        className={styles.clipPopupThumb}
-                        style={{ background: `linear-gradient(160deg, ${camera.gradient[0]}, ${camera.gradient[1]})` }}
-                      />
-                      <a
-                        href={getClipDownloadUrl(camera.id, clip.id)}
-                        download
-                        onClick={e => e.stopPropagation()}
-                        style={{ fontSize: '0.7rem', color: '#7eb8ff', marginTop: 4 }}
-                      >
-                        Download
-                      </a>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            {/* Playhead */}
-            <div className={styles.playhead} style={{ left: `${progress}%` }} />
-          </div>
-
-          {/* Zoom */}
-          <div className={styles.zoom}>
-            <button className={styles.timelineBtn}><IconZoomOut size={15} /></button>
-            <div className={styles.zoomTrack}>
-              <div className={styles.zoomThumb} style={{ left: '30%' }} />
-            </div>
-            <button className={styles.timelineBtn}><IconZoomIn size={15} /></button>
-          </div>
-        </div>
-        </div>{/* cardInner */}
       </div>{/* cardOuter */}
       </div>{/* scrollArea */}
     </div>

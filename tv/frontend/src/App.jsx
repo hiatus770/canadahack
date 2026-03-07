@@ -10,6 +10,7 @@ export default function App() {
   const [railActive, setRailActive] = useState('home')
   const [activeTab, setActiveTab] = useState('All')
   const [selectedCamera, setSelectedCamera] = useState(null)
+  const [selectedClip, setSelectedClip] = useState(null)
   const [cameras, setCameras] = useState([])
   const [alerts, setAlerts] = useState([])
 
@@ -39,9 +40,10 @@ export default function App() {
   useEffect(() => {
     loadCameras()
     loadAlerts()
-    const interval = setInterval(loadCameras, 10000)
-    const cleanup = connectAlertWS((alert) => {
-      setAlerts(prev => [alert, ...prev].slice(0, 50))
+    const interval = setInterval(() => { loadCameras(); loadAlerts() }, 10000)
+    const cleanup = connectAlertWS(() => {
+      // Re-fetch clips shortly after an alert so the saved clip ID is available
+      setTimeout(loadAlerts, 5000)
     })
     return () => { clearInterval(interval); cleanup() }
   }, [loadCameras, loadAlerts])
@@ -59,7 +61,9 @@ export default function App() {
           <CameraPlayer
             camera={selectedCamera}
             cameras={cameras}
-            onBack={() => setSelectedCamera(null)}
+            selectedClip={selectedClip}
+            onClearClip={() => setSelectedClip(null)}
+            onBack={() => { setSelectedCamera(null); setSelectedClip(null) }}
           />
         ) : (
           <CameraGrid
@@ -72,7 +76,13 @@ export default function App() {
         )}
       </div>
 
-      <FeedPanel alerts={alerts} />
+      <FeedPanel
+        alerts={alerts}
+        onSelectClip={(clip) => {
+          setSelectedClip(clip)
+          if (cameras.length > 0) setSelectedCamera(prev => prev ?? cameras[0])
+        }}
+      />
     </div>
     </div>
   )

@@ -22,6 +22,8 @@ class CameraCapture:
         self._cap = cv2.VideoCapture(config.CAMERA_INDEX)
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH)
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT)
+        self._cap.set(cv2.CAP_PROP_FPS, config.FPS)
+        self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         if not self._cap.isOpened():
             raise RuntimeError(f"Cannot open camera index {config.CAMERA_INDEX}")
         # Read actual resolution
@@ -41,13 +43,11 @@ class CameraCapture:
             self._cap = None
 
     def _capture_loop(self):
-        interval = 1.0 / self._fps
         while self._running:
             ret, frame = self._cap.read()
             if ret:
                 with self._lock:
                     self._frame = frame
-            time.sleep(interval)
 
     def get_frame(self) -> np.ndarray | None:
         with self._lock:

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
 import styles from './CameraGrid.module.css'
 import { IconWifi, IconBattery, IconMore } from './icons'
-import { getSnapshotUrl } from './api'
+import { getStreamUrl } from './api'
 
-function CameraCard({ camera, onSelect, snapshotTick }) {
+function CameraCard({ camera, onSelect }) {
   const isOffline = camera.status === 'offline'
   const [c1, c2] = camera.gradient
 
@@ -14,15 +13,13 @@ function CameraCard({ camera, onSelect, snapshotTick }) {
         className={styles.feed}
         style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
       >
-        {/* Live stream image */}
+        {/* Live MJPEG stream */}
         {!isOffline && (
           <img
-            src={getSnapshotUrl(camera.id, snapshotTick)}
+            src={getStreamUrl(camera.id, { fps: 10, quality: 50 })}
             alt={camera.name}
             className={styles.streamImg}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
-            loading="lazy"
-            decoding="async"
           />
         )}
         {/* Scanlines */}
@@ -63,14 +60,6 @@ function CameraCard({ camera, onSelect, snapshotTick }) {
 }
 
 export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera }) {
-  const [snapshotTick, setSnapshotTick] = useState(Date.now())
-
-  useEffect(() => {
-    // Grid cards use snapshots instead of full streams to keep dashboard responsive.
-    const id = setInterval(() => setSnapshotTick(Date.now()), 1200)
-    return () => clearInterval(id)
-  }, [])
-
   const filtered = activeTab === 'All'
     ? cameras
     : cameras.filter(c => c.location === activeTab)
@@ -107,7 +96,7 @@ export default function CameraGrid({ cameras, locations, activeTab, setActiveTab
               <h2 className={styles.groupTitle}>{location}</h2>
               <div className={styles.grid}>
                 {cams.map(cam => (
-                  <CameraCard key={cam.id} camera={cam} onSelect={onSelectCamera} snapshotTick={snapshotTick} />
+                  <CameraCard key={cam.id} camera={cam} onSelect={onSelectCamera} />
                 ))}
               </div>
             </div>

@@ -99,17 +99,6 @@
   position: relative;
 }
 
-/* Vertical timeline line through all dots */
-.list::before {
-  content: '';
-  position: absolute;
-  left: 22px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--gray-200);
-  pointer-events: none;
-}
 
 .eventRow {
   display: flex;
@@ -122,6 +111,8 @@
 }
 .eventRow:last-child { border-bottom: none; }
 .eventRow:hover { background: var(--gray-50); }
+.eventRowClickable { cursor: pointer; }
+.eventRowClickable:hover { background: var(--gray-100); }
 
 .dot {
   width: 8px;
@@ -167,5 +158,26 @@
 
 .eventTime {
   font-size: 11px;
+  color: var(--gray-400);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--gray-400);
+}
+
+.emptyIcon {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 13px;
+  font-weight: 500;
   color: var(--gray-400);
 }

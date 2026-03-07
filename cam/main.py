@@ -147,6 +147,22 @@ def get_clip(clip_id: str):
     return FileResponse(path, media_type="video/mp4", filename=path.name)
 
 
+@app.get("/clips/{clip_id}/thumb")
+def get_clip_thumb(clip_id: str):
+    """Return a JPEG thumbnail (first frame) of a recorded clip."""
+    import cv2 as _cv2
+    path = recorder.get_clip_path(clip_id)
+    if path is None:
+        return Response(status_code=404, content="Clip not found")
+    cap = _cv2.VideoCapture(str(path))
+    ret, frame = cap.read()
+    cap.release()
+    if not ret:
+        return Response(status_code=500, content="Could not read frame")
+    _, buf = _cv2.imencode('.jpg', frame, [_cv2.IMWRITE_JPEG_QUALITY, 70])
+    return Response(content=buf.tobytes(), media_type="image/jpeg")
+
+
 # ─── Commands ─────────────────────────────────────────────────────────────────
 
 @app.post("/command")
