@@ -1,0 +1,263 @@
+/* ── Shares panel ── */
+.panel {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Table ── */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.table td {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--gray-1000);
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+
+.table tr:hover td {
+  background: var(--gray-50);
+}
+
+/* ── Label & path ── */
+.label {
+  font-weight: 500;
+  color: var(--gray-1000);
+}
+
+.path {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+/* ── Status badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.badgeActive {
+  background: var(--green-50);
+  color: var(--green-500);
+}
+.badgeActive .badgeDot {
+  background: var(--green-200);
+}
+
+.badgeDisabled {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+.badgeDisabled .badgeDot {
+  background: var(--gray-300);
+}
+
+.badgeOneTime {
+  background: #fff8e1;
+  color: #856404;
+}
+.badgeOneTime .badgeDot {
+  background: #ffe082;
+}
+
+/* ── URL cell ── */
+.urlCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.urlText {
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: var(--gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.btnCopy {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btnCopy:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+.btnCopy.copied {
+  background: var(--green-50);
+  border-color: var(--green-200);
+  color: var(--green-500);
+}
+
+/* ── Date ── */
+.date {
+  font-size: 12px;
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+/* ── Action buttons ── */
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btnToggle {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btnToggle:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-300);
+}
+
+.btnDelete {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btnDelete:hover {
+  background: #FFD3CF;
+  border-color: #FFD3CF;
+  color: #B22D30;
+}
+
+/* ── Empty state ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+}
+
+.emptyIcon {
+  color: var(--gray-300);
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.emptyText {
+  font-size: 14px;
+  color: var(--gray-400);
+  text-align: center;
+  max-width: 320px;
+}
+
+/* ── Loading ── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--gray-400);
+  font-size: 14px;
+}
+
+/* ── Confirm delete ── */
+.confirmText {
+  font-size: 12px;
+  color: #B22D30;
+  white-space: nowrap;
+}
+
+.btnConfirm {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid #FFD3CF;
+  border-radius: 5px;
+  background: #FFD3CF;
+  font-size: 12px;
+  font-weight: 500;
+  color: #B22D30;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btnConfirm:hover {
+  background: #FFBAB5;
+}
+
+.btnCancelDelete {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btnCancelDelete:hover {
+  background: var(--gray-100);
+}

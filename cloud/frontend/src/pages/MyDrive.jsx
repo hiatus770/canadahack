@@ -8,6 +8,8 @@ import { FolderIcon, IconGrid, IconList } from '../components/icons'
 import { useSearch } from '../context/SearchContext'
 import { listAllFiles, listMachines, deleteFile, renameFile } from '../api'
 import FileViewer from '../components/FileViewer'
+import ShareModal from '../components/ShareModal'
+import PublicSharesPanel from '../components/PublicSharesPanel'
 
 function formatBytes(bytes) {
   if (!bytes) return '0 B'
@@ -28,6 +30,7 @@ const FOLDER_COLORS = [
 export default function MyDrive() {
   const [view, setView] = useState('grid')
   const [selected, setSelected] = useState(null)
+  const [tab, setTab] = useState('files')
   const { sort, setSort } = useSort()
   const { query } = useSearch()
   const navigate = useNavigate()
@@ -36,6 +39,7 @@ export default function MyDrive() {
   const [machines, setMachines] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewerFile, setViewerFile] = useState(null)
+  const [shareFile, setShareFile] = useState(null)
 
   useEffect(() => {
     Promise.all([listAllFiles(), listMachines()])
@@ -87,16 +91,26 @@ export default function MyDrive() {
     <main className={styles.main}>
       <div className={styles.pageHeader}>
         <span className={styles.pageTitle}>My Drive</span>
-        <div className={styles.toolbar}>
-          <SortDropdown sort={sort} setSort={setSort} />
-          <div className={styles.toolbarDivider} />
-          <div className={styles.viewToggle}>
-            <button className={`${styles.viewBtn} ${view === 'grid' ? styles.viewBtnActive : ''}`} onClick={() => setView('grid')} title="Grid view"><IconGrid /></button>
-            <button className={`${styles.viewBtn} ${view === 'list' ? styles.viewBtnActive : ''}`} onClick={() => setView('list')} title="List view"><IconList /></button>
-          </div>
+        <div className={styles.viewToggle} style={{ marginLeft: 16 }}>
+          <button className={`${styles.viewBtn} ${tab === 'files' ? styles.viewBtnActive : ''}`} onClick={() => setTab('files')} style={{ width: 'auto', padding: '0 10px', fontSize: 12, fontWeight: 500 }}>Files</button>
+          <button className={`${styles.viewBtn} ${tab === 'shares' ? styles.viewBtnActive : ''}`} onClick={() => setTab('shares')} style={{ width: 'auto', padding: '0 10px', fontSize: 12, fontWeight: 500 }}>Public Shares</button>
         </div>
+        {tab === 'files' && (
+          <div className={styles.toolbar}>
+            <SortDropdown sort={sort} setSort={setSort} />
+            <div className={styles.toolbarDivider} />
+            <div className={styles.viewToggle}>
+              <button className={`${styles.viewBtn} ${view === 'grid' ? styles.viewBtnActive : ''}`} onClick={() => setView('grid')} title="Grid view"><IconGrid /></button>
+              <button className={`${styles.viewBtn} ${view === 'list' ? styles.viewBtnActive : ''}`} onClick={() => setView('list')} title="List view"><IconList /></button>
+            </div>
+          </div>
+        )}
+        {tab === 'shares' && <div className={styles.toolbar} />}
       </div>
 
+      {tab === 'shares' ? (
+        <PublicSharesPanel />
+      ) : (
       <div className={styles.content}>
         {loading ? (
           <div className={styles.empty}>
@@ -132,7 +146,7 @@ export default function MyDrive() {
                   <div className={styles.filesGrid}>
                     {files.map(f => (
                       <div key={f.path} onClick={() => setViewerFile(f)}>
-                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} />
+                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} onShare={setShareFile} />
                       </div>
                     ))}
                   </div>
@@ -166,6 +180,7 @@ export default function MyDrive() {
           </>
         )}
       </div>
+      )}
 
       <div className={styles.statusBar}>
         <div className={styles.statusConnected}>
@@ -178,7 +193,8 @@ export default function MyDrive() {
         <span className={styles.statusRight}>Last synced: just now</span>
       </div>
 
-      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} />}
+      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} onShare={f => { setViewerFile(null); setShareFile(f) }} />}
+      {shareFile && <ShareModal file={shareFile} onClose={() => setShareFile(null)} />}
     </main>
   )
 }

@@ -80,7 +80,7 @@ function FilePreviewContent({ file }) {
   return null
 }
 
-export default function FileCard({ file, selected, onSelect, onDelete, onRename }) {
+export default function FileCard({ file, selected, onSelect, onDelete, onRename, onShare }) {
   const { name, kind, collabs = [] } = file
   const { Icon, label, thumb, dark } = KIND_MAP[kind] ?? KIND_MAP.document
   const ext = getExt(name)
@@ -114,6 +114,7 @@ export default function FileCard({ file, selected, onSelect, onDelete, onRename 
     >
       <div className={styles.cardMoreBtn} onClick={e => e.stopPropagation()}>
         <MoreMenu
+          onShare={onShare ? () => onShare(file) : undefined}
           onRename={onRename ? startRename : undefined}
           onDelete={onDelete ? () => onDelete(file) : undefined}
         />

@@ -8,6 +8,7 @@ import { FolderIcon, IconGrid, IconList, IconChevronRight } from '../components/
 import { useSearch } from '../context/SearchContext'
 import { listFiles } from '../api'
 import FileViewer from '../components/FileViewer'
+import ShareModal from '../components/ShareModal'
 
 function formatBytes(bytes) {
   if (!bytes) return '0 B'
@@ -39,6 +40,7 @@ export default function TailnetDrive() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [viewerFile, setViewerFile] = useState(null)
+  const [shareFile, setShareFile] = useState(null)
 
   const currentPath = subpath || `/${name}`
 
@@ -156,7 +158,7 @@ export default function TailnetDrive() {
                   <div className={styles.filesGrid}>
                     {files.map(f => (
                       <div key={f.path} onClick={() => handleFileClick(f)}>
-                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} />
+                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onShare={setShareFile} />
                       </div>
                     ))}
                   </div>
@@ -202,7 +204,8 @@ export default function TailnetDrive() {
         <span className={styles.statusRight}>Last synced: just now</span>
       </div>
 
-      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} />}
+      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} onShare={f => { setViewerFile(null); setShareFile(f) }} />}
+      {shareFile && <ShareModal file={shareFile} onClose={() => setShareFile(null)} />}
     </main>
   )
 }

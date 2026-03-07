@@ -84,6 +84,36 @@ func main() {
 	mux.HandleFunc("GET /api/comments", h.GetComments)
 	mux.HandleFunc("POST /api/comments", h.AddComment)
 
+	// ── Public share links ──
+	shareStore := NewShareStore("public_shares.json", h)
+	shareStore.Load()
+	shareStore.StartHeartbeatReaper()
+	go EnsureTailscaleServe()
+
+	ph := &PublicHandlers{store: shareStore, handlers: h}
+
+	// Owner API (tailnet-only)
+	mux.HandleFunc("POST /api/public-shares", ph.CreatePublicShare)
+	mux.HandleFunc("GET /api/public-shares", ph.ListPublicShares)
+	mux.HandleFunc("DELETE /api/public-shares/{id}", ph.DeletePublicShare)
+	mux.HandleFunc("POST /api/public-shares/{id}/toggle", ph.TogglePublicShare)
+
+	// Public endpoints (funneled via /s/)
+	mux.HandleFunc("GET /s/{id}", ph.RenderSharePage)
+	mux.HandleFunc("POST /s/{id}/auth", ph.AuthShare)
+	mux.HandleFunc("GET /s/{id}/download", ph.DownloadShare)
+	mux.HandleFunc("GET /s/{id}/files", ph.ListShareFiles)
+	mux.HandleFunc("POST /s/{id}/heartbeat", ph.HeartbeatShare)
+
+	// Wrap mux: tailscale --set-path=/s strips the /s prefix,
+	// so re-add it for requests that don't start with /s/ or /api/
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.URL.Path, "/s/") && !strings.HasPrefix(r.URL.Path, "/api/") {
+			r.URL.Path = "/s" + r.URL.Path
+		}
+		mux.ServeHTTP(w, r)
+	})
+
 	log.Printf("TailCloud backend listening on %s", listenAddr)
-	log.Fatal(http.ListenAndServe(listenAddr, cors(mux)))
+	log.Fatal(http.ListenAndServe(listenAddr, cors(handler)))
 }

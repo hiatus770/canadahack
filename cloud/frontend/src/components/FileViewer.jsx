@@ -36,7 +36,7 @@ function timeAgo(ts) {
   return `${days}d ago`
 }
 
-export default function FileViewer({ file, onClose }) {
+export default function FileViewer({ file, onClose, onShare }) {
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [commentText, setCommentText] = useState('')
@@ -117,6 +117,15 @@ export default function FileViewer({ file, onClose }) {
           </button>
           <span className={styles.fileName}>{file.name}</span>
           <div className={styles.headerActions}>
+            {onShare && (
+              <button className={styles.downloadBtn} onClick={() => onShare(file)} style={{ background: 'var(--gray-50)' }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M4.5 8.5a2 2 0 100-4 2 2 0 000 4zM9.5 5.5a2 2 0 100-4 2 2 0 000 4zM9.5 12.5a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" strokeWidth="1.1"/>
+                  <path d="M6.3 7.4l1.4.7M6.3 5.6l1.4-.7" stroke="currentColor" strokeWidth="1.1"/>
+                </svg>
+                Share
+              </button>
+            )}
             <button className={styles.downloadBtn} onClick={handleDownload}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 1v9M3.5 7L7 10.5 10.5 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>

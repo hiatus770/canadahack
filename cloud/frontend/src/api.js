@@ -130,3 +130,37 @@ export async function addComment(path, text, author) {
   if (!res.ok) throw new Error(await res.text())
   return res.json()
 }
+
+// ── Public share links ──
+
+export async function createPublicShare(path, label, oneTime) {
+  const res = await fetch(`${API}/public-shares`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, label, oneTime }),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function listPublicShares() {
+  const res = await fetch(`${API}/public-shares`)
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function deletePublicShare(id) {
+  const res = await fetch(`${API}/public-shares/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function togglePublicShare(id) {
+  const res = await fetch(`${API}/public-shares/${encodeURIComponent(id)}/toggle`, {
+    method: 'POST',
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}

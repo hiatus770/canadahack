@@ -9,6 +9,7 @@ import { useSearch } from '../context/SearchContext'
 import { listFiles, deleteFile, renameFile } from '../api'
 import MoreMenu from '../components/MoreMenu'
 import FileViewer from '../components/FileViewer'
+import ShareModal from '../components/ShareModal'
 
 function formatBytes(bytes) {
   if (!bytes) return '0 B'
@@ -83,6 +84,7 @@ export default function BrowseFolder() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewerFile, setViewerFile] = useState(null)
+  const [shareFile, setShareFile] = useState(null)
 
   async function handleDelete(file) {
     try {
@@ -197,7 +199,7 @@ export default function BrowseFolder() {
                   <div className={styles.filesGrid}>
                     {files.map(f => (
                       <div key={f.path} onClick={() => setViewerFile(f)}>
-                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} />
+                        <FileCard file={{ ...f, collabs: [] }} selected={selected === f.path} onSelect={() => setSelected(f.path)} onDelete={handleDelete} onRename={handleRename} onShare={setShareFile} />
                       </div>
                     ))}
                   </div>
@@ -234,7 +236,8 @@ export default function BrowseFolder() {
         <span className={styles.statusRight}>Last synced: just now</span>
       </div>
 
-      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} />}
+      {viewerFile && <FileViewer file={viewerFile} onClose={() => setViewerFile(null)} onShare={f => { setViewerFile(null); setShareFile(f) }} />}
+      {shareFile && <ShareModal file={shareFile} onClose={() => setShareFile(null)} />}
     </main>
   )
 }
