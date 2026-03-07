@@ -1,0 +1,435 @@
+.wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Tab bar */
+.tabBar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--gray-50);
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-1000);
+  letter-spacing: -0.3px;
+}
+
+.tabs { display: flex; gap: 4px; }
+
+.tab {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  transition: all var(--transition);
+}
+.tab:hover { background: var(--gray-200); }
+.tabActive { background: var(--gray-1000); color: #fff; }
+
+/* Nav row */
+.navRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  flex-shrink: 0;
+  background: var(--gray-50);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  transition: color var(--transition);
+}
+.backBtn:hover { color: var(--gray-1000); }
+
+.navRight {}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  transition: color var(--transition);
+}
+.navBtn:hover:not(:disabled) { color: var(--gray-1000); }
+.navBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Scrollable */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardInner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px 16px;
+}
+
+.cardOuter {
+  display: flex;
+  flex-direction: column;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  gap: 0;
+}
+
+/* Video */
+.video {
+  width: 100%;
+  aspect-ratio: 16/8;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 3px
+  );
+  pointer-events: none;
+}
+
+.videoTopLeft {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sigIcon { display: flex; }
+
+.videoTopRight {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.videoBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background var(--transition);
+}
+.videoBtn:hover { background: rgba(0,0,0,0.65); }
+
+.bottomOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 14px 10px;
+}
+
+.videoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.videoName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.videoDate {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  margin: 0;
+}
+.progressBar::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* Controls bar */
+.controls {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  padding: 0 2px;
+  height: 40px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ctrlLeft  { display: flex; align-items: center; gap: 10px; flex: 1; }
+.ctrlCenter{ display: flex; align-items: center; gap: 6px;  }
+.ctrlRight { display: flex; align-items: center; gap: 8px;  flex: 1; justify-content: flex-end; }
+
+.ctrlBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.ctrlBtn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.ctrlPlay {
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+.ctrlPlay:hover { background: rgba(255,255,255,0.25); }
+
+.ctrlTime {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+.liveBtn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  transition: all var(--transition);
+}
+.liveBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+
+/* Timeline */
+.timeline {
+  margin-top: 0;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.todayBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background var(--transition);
+}
+.todayBtn:hover { background: var(--gray-100); }
+
+.timelineActions { display: flex; gap: 4px; }
+
+.timelineBtn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--gray-200);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.timelineBtn:hover { background: var(--gray-100); color: var(--gray-700); }
+
+/* Clips strip */
+.clipsStrip {
+  padding: 0 16px 12px;
+  position: relative;
+  overflow-x: auto;
+}
+
+.timeLabels {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 4px;
+}
+
+.timeLabel {
+  font-size: 10px;
+  color: var(--gray-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.clips {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  position: relative;
+  min-height: 100px;
+}
+
+.clipGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  position: relative;
+}
+
+.clipThumb {
+  width: 100%;
+  height: 64px;
+  border-radius: 8px;
+  transition: opacity var(--transition);
+}
+.clipGroup:hover .clipThumb { opacity: 0.85; }
+.clipGroupActive .clipThumb {
+  outline: 2px solid var(--blue-400);
+  outline-offset: 2px;
+}
+
+.clipCount {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+.clipPopup {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-900);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 90px;
+  z-index: 10;
+  box-shadow: var(--shadow-4);
+}
+
+.clipPopupTime {
+  font-size: 10px;
+  color: #fff;
+  padding: 4px 6px 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.clipPopupThumb {
+  width: 90px;
+  height: 56px;
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--blue-400);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Zoom */
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.zoomTrack {
+  flex: 1;
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 9999px;
+  position: relative;
+}
+
+.zoomThumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gray-500);
+  cursor: grab;
+}
