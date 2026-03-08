@@ -1,6 +1,7 @@
 import styles from './CameraGrid.module.css'
 import { IconWifi, IconBattery, IconClip, IconPlus, IconTrash } from './icons'
 import { getStreamUrl, deleteCamera } from './api'
+import logo from './assets/tailCamLogo.svg'
 
 function CameraCard({ camera, clipCount, onSelect, onDelete, isSingle }) {
   const isOffline = camera.status === 'offline'
@@ -50,8 +51,11 @@ function CameraCard({ camera, clipCount, onSelect, onDelete, isSingle }) {
         {/* Offline overlay */}
         {isOffline && (
           <div className={styles.offlineOverlay}>
-            <div className={styles.offlineDot} />
-            <span>Offline</span>
+            <img src={logo} alt="Offline" className={styles.offlineLogo} />
+            <div className={styles.offlineLabel}>
+              <div className={styles.offlineDot} />
+              <span>Offline</span>
+            </div>
           </div>
         )}
 
