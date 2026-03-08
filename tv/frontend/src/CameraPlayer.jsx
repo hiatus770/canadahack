@@ -3,7 +3,7 @@ import styles from './CameraPlayer.module.css'
 import {
   IconChevronLeft, IconChevronRight,
   IconPlay, IconPause, IconSkipBack, IconSkipForward,
-  IconVolume, IconFullscreen,
+  IconVolume, IconFullscreen, IconWifi, IconBattery,
   IconVolumeOff, IconSkip1Back, IconSkip1Forward,
 } from './icons'
 import { getStreamUrl, getClipDownloadUrl } from './api'
@@ -164,21 +164,10 @@ export default function CameraPlayer({ camera, cameras = [], selectedClip, onCle
 
           {/* Top-left: signal icons */}
           <div className={styles.videoTopLeft}>
-            <span className={styles.sigIcon}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1.5 5.5C3.7 3.4 6.2 2.5 7 2.5s3.3.9 5.5 3" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
-                <path d="M3.5 7.5C4.8 6.3 5.9 5.7 7 5.7s2.2.6 3.5 1.8" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
-                <path d="M5.5 9.5C6.1 9 6.6 8.8 7 8.8s.9.2 1.5.7" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
-                <circle cx="7" cy="11.5" r="0.8" fill="white"/>
-              </svg>
-            </span>
-            <span className={styles.sigIcon}>
-              <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
-                <rect x="0.75" y="0.75" width="16" height="10.5" rx="2" stroke="white" strokeWidth="1.2"/>
-                <path d="M17.5 4v4" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
-                <rect x="2.5" y="2.5" width="10" height="7" rx="1" fill="white" opacity="0.7"/>
-              </svg>
-            </span>
+            <IconWifi size={13} level={camera.wifi ?? 100} />
+            <span className={styles.statDivider} />
+            <IconBattery size={15} level={camera.battery ?? 100} />
+            <span className={styles.statPct}>{camera.battery ?? 100}%</span>
           </div>
 
           {/* Bottom overlay: info + progress + controls */}
