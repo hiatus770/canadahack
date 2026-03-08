@@ -30,7 +30,7 @@ class Alerter:
         """Register this camera with the TailTV backend."""
         try:
             resp = self._client.post(
-                f"{config.TAILTV_BACKEND_URL}/api/cameras/register",
+                f"{config.TAILTV_BACKEND_URL.rstrip('/')}/api/cameras/register",
                 json={
                     "id": config.CAM_ID,
                     "name": config.CAM_NAME,
@@ -59,7 +59,7 @@ class Alerter:
         }
         try:
             self._client.post(
-                f"{config.TAILTV_BACKEND_URL}/api/alerts",
+                f"{config.TAILTV_BACKEND_URL.rstrip('/')}/api/alerts",
                 json=payload,
             )
             logger.info(f"Alert sent: {event_type}")
@@ -70,7 +70,7 @@ class Alerter:
         while self._running:
             try:
                 self._client.post(
-                    f"{config.TAILTV_BACKEND_URL}/api/cameras/heartbeat",
+                    f"{config.TAILTV_BACKEND_URL.rstrip('/')}/api/cameras/heartbeat",
                     json={
                         "id": config.CAM_ID,
                         "timestamp": datetime.now().isoformat(),
