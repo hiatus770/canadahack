@@ -100,6 +100,12 @@ export async function sendCommand(camId, command) {
   return res.json()
 }
 
+export async function whoami() {
+  const res = await fetch('/api/whoami')
+  if (!res.ok) return { displayName: 'Unknown', loginName: '' }
+  return res.json()
+}
+
 export function connectAlertWS(onAlert) {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
   const ws = new WebSocket(`${proto}//${location.host}/api/ws`)

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import threading
 import time
 
@@ -12,6 +13,7 @@ from capture import camera
 from detection import engine
 from recorder import recorder
 from alerter import alerter
+from uploader import uploader
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cam")
@@ -40,9 +42,18 @@ def _detection_loop():
                     "persons": result["persons"],
                     "motion_area": result["motion_area"],
                 })
-                # Record clip
-                recorder.record_clip_async(camera.get_frame, event_type=event)
+                # Record clip, then upload
+                _record_and_upload(event)
         time.sleep(0.15)
+
+
+def _record_and_upload(event_type: str):
+    """Record a clip and queue it for upload to TailCloud."""
+    def _do():
+        meta = recorder.record_clip(camera.get_frame, event_type=event_type)
+        if meta:
+            uploader.enqueue(meta)
+    threading.Thread(target=_do, daemon=True).start()
 
 
 # ─── Lifecycle ────────────────────────────────────────────────────────────────
@@ -53,6 +64,8 @@ def startup():
     logger.info(f"Camera started: {camera.resolution}")
     alerter.start()
     alerter.register(resolution=camera.resolution)
+    uploader.start()
+    uploader.sync_existing(recorder.list_clips())
     threading.Thread(target=_detection_loop, daemon=True).start()
     logger.info(f"TailCam '{config.CAM_NAME}' running on port {config.PORT}")
 
@@ -61,6 +74,7 @@ def startup():
 def shutdown():
     camera.stop()
     alerter.stop()
+    uploader.stop()
 
 
 # ─── MJPEG Stream ────────────────────────────────────────────────────────────
@@ -143,6 +157,8 @@ def status():
         "cpu": cpu_pct,
         "fps": camera.actual_fps,
         "port": config.PORT,
+        "cloud_uploads": uploader.uploaded_count,
+        "cloud_pending": uploader.pending_count,
     }
 
 
@@ -187,7 +203,7 @@ def command(body: dict):
     cmd = body.get("command")
     if cmd == "start_recording":
         recorder.manual_recording = True
-        recorder.record_clip_async(camera.get_frame, event_type="manual")
+        _record_and_upload("manual")
         return {"status": "recording_started"}
     elif cmd == "stop_recording":
         recorder.manual_recording = False
@@ -196,6 +212,88 @@ def command(body: dict):
         return {"status": "use GET /snapshot"}
     else:
         return JSONResponse(status_code=400, content={"error": f"Unknown command: {cmd}"})
+
+
+# ─── Settings ─────────────────────────────────────────────────────────────────
+
+SETTINGS_FILE = config.CLIPS_DIR.parent / "cam_settings.json"
+
+def _load_settings() -> dict:
+    """Load persisted settings from disk."""
+    import json
+    if SETTINGS_FILE.exists():
+        try:
+            return json.loads(SETTINGS_FILE.read_text())
+        except Exception:
+            pass
+    return {}
+
+def _save_settings(data: dict):
+    """Persist settings to disk."""
+    import json
+    SETTINGS_FILE.write_text(json.dumps(data, indent=2))
+
+def _apply_settings(data: dict):
+    """Apply settings to the running config."""
+    if "tailtv_backend_url" in data:
+        config.TAILTV_BACKEND_URL = data["tailtv_backend_url"]
+    if "tailcloud_url" in data:
+        config.TAILCLOUD_URL = data["tailcloud_url"]
+    if "tailcloud_upload_share" in data:
+        config.TAILCLOUD_UPLOAD_SHARE = data["tailcloud_upload_share"]
+    if "cam_name" in data:
+        config.CAM_NAME = data["cam_name"]
+    if "cam_location" in data:
+        config.CAM_LOCATION = data["cam_location"]
+    if "clip_duration" in data:
+        config.CLIP_DURATION = int(data["clip_duration"])
+    if "motion_sensitivity" in data:
+        config.MOTION_SENSITIVITY = float(data["motion_sensitivity"])
+    if "person_confidence" in data:
+        config.PERSON_CONFIDENCE = float(data["person_confidence"])
+
+# Apply any saved settings on import
+_apply_settings(_load_settings())
+
+
+@app.get("/settings")
+def get_settings():
+    """Return current camera settings."""
+    return {
+        "cam_id": config.CAM_ID,
+        "cam_name": config.CAM_NAME,
+        "cam_location": config.CAM_LOCATION,
+        "tailtv_backend_url": config.TAILTV_BACKEND_URL,
+        "tailcloud_url": config.TAILCLOUD_URL,
+        "tailcloud_upload_share": config.TAILCLOUD_UPLOAD_SHARE,
+        "tailcloud_upload_path": uploader.upload_path,
+        "clip_duration": config.CLIP_DURATION,
+        "motion_sensitivity": config.MOTION_SENSITIVITY,
+        "person_confidence": config.PERSON_CONFIDENCE,
+        "fps": config.FPS,
+        "resolution": f"{config.FRAME_WIDTH}x{config.FRAME_HEIGHT}",
+    }
+
+
+@app.post("/settings")
+def update_settings(body: dict):
+    """Update camera settings and persist them."""
+    allowed = {
+        "cam_name", "cam_location",
+        "tailtv_backend_url", "tailcloud_url", "tailcloud_upload_share",
+        "clip_duration", "motion_sensitivity", "person_confidence",
+    }
+    updates = {k: v for k, v in body.items() if k in allowed}
+    if not updates:
+        return JSONResponse(status_code=400, content={"error": "No valid settings provided"})
+
+    # Merge with existing
+    current = _load_settings()
+    current.update(updates)
+    _save_settings(current)
+    _apply_settings(current)
+
+    return {"status": "ok", "applied": list(updates.keys())}
 
 
 # ─── Phone webcam page ───────────────────────────────────────────────────────
@@ -249,5 +347,8 @@ def phone_stream():
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    import signal
     import uvicorn
+
+    signal.signal(signal.SIGINT, lambda *_: os._exit(0))
     uvicorn.run("main:app", host=config.HOST, port=config.PORT, reload=False)

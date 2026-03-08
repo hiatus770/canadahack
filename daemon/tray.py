@@ -37,7 +37,7 @@ SERVICE_DEFS = [
         "port": 5173,
         "cwd": os.path.join(PROJECT_ROOT, "cloud", "frontend"),
         "build_cmd": None,
-        "run_cmd": ["npx", "vite", "--host", "0.0.0.0"],
+        "run_cmd": ["npx", "vite", "--host", "0.0.0.0", "--port", "5173"],
         "pkill_pattern": "node.*vite.*cloud",
         "log": "/tmp/tailcloud-frontend.log",
         "tailscale_serve": None,  # handled by EnsureTailscaleServe() in Go
@@ -60,7 +60,7 @@ SERVICE_DEFS = [
         "port": 5174,
         "cwd": os.path.join(PROJECT_ROOT, "tv", "frontend"),
         "build_cmd": None,
-        "run_cmd": ["npx", "vite", "--host", "0.0.0.0"],
+        "run_cmd": ["npx", "vite", "--host", "0.0.0.0", "--port", "5174"],
         "pkill_pattern": "node.*vite.*tv",
         "log": "/tmp/tailtv-frontend.log",
         "tailscale_serve": {"path": "/tv", "target": "localhost:5174"},

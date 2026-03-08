@@ -314,6 +314,74 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  USER IDENTITY — uses tailscale whois like TailCloud does
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/whoami")
+async def whoami(request: Request):
+    """Identify the connecting user via Tailscale whois."""
+    import subprocess, json as _json
+
+    # Get client IP — prefer X-Forwarded-For (set by Vite proxy)
+    client_ip = request.headers.get("x-forwarded-for", "")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+
+    # Strip IPv6-mapped IPv4 prefix
+    if client_ip.startswith("::ffff:"):
+        client_ip = client_ip[7:]
+
+    # Try tailscale whois on the client IP
+    try:
+        out = subprocess.check_output(
+            ["tailscale", "whois", "--json", client_ip],
+            timeout=5,
+        )
+        data = _json.loads(out)
+        result = {"tailscaleIP": client_ip}
+        node = data.get("Node", {})
+        hostinfo = node.get("Hostinfo", {})
+        if "Hostname" in hostinfo:
+            result["hostname"] = hostinfo["Hostname"]
+        profile = data.get("UserProfile", {})
+        if "DisplayName" in profile:
+            result["displayName"] = profile["DisplayName"]
+        if "LoginName" in profile:
+            result["loginName"] = profile["LoginName"]
+        return result
+    except Exception:
+        pass
+
+    # Fallback: use the local machine's tailscale identity
+    try:
+        out = subprocess.check_output(
+            ["tailscale", "status", "--json"],
+            timeout=5,
+        )
+        status = _json.loads(out)
+        self_node = status.get("Self", {})
+        hostname = self_node.get("HostName", "")
+        user_id = self_node.get("UserID")
+        display_name = ""
+        login_name = ""
+        if user_id is not None:
+            users = status.get("User", {})
+            user = users.get(str(int(user_id)), {})
+            display_name = user.get("DisplayName", "")
+            login_name = user.get("LoginName", "")
+        return {
+            "displayName": display_name,
+            "loginName": login_name,
+            "hostname": hostname,
+            "tailscaleIP": client_ip,
+        }
+    except Exception as e:
+        return {"displayName": "Unknown", "loginName": "", "hostname": "", "tailscaleIP": client_ip}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  RUN
 # ═══════════════════════════════════════════════════════════════════════════════
 
