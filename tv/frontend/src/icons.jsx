@@ -27,6 +27,14 @@ export function IconBell({ size = 20 }) {
   )
 }
 
+export function IconTrash({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+      <path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
 export function IconPlus({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none">

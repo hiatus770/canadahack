@@ -137,6 +137,12 @@ async def get_camera(cam_id: str) -> dict | None:
         return None
 
 
+async def delete_camera(cam_id: str):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM cameras WHERE id = ?", (cam_id,))
+        await db.commit()
+
+
 async def insert_alert(alert: dict) -> int:
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute("""

@@ -1,8 +1,8 @@
 import styles from './CameraGrid.module.css'
-import { IconWifi, IconBattery, IconClip, IconPlus } from './icons'
-import { getStreamUrl } from './api'
+import { IconWifi, IconBattery, IconClip, IconPlus, IconTrash } from './icons'
+import { getStreamUrl, deleteCamera } from './api'
 
-function CameraCard({ camera, clipCount, onSelect, isSingle }) {
+function CameraCard({ camera, clipCount, onSelect, onDelete, isSingle }) {
   const isOffline = camera.status === 'offline'
   const [c1, c2] = camera.gradient
 
@@ -37,6 +37,13 @@ function CameraCard({ camera, clipCount, onSelect, isSingle }) {
             {!isOffline && clipCount > 0 && (
               <span className={styles.motionBadge}><IconClip size={12} /> {clipCount}</span>
             )}
+            <button
+              className={styles.deleteBtn}
+              onClick={e => { e.stopPropagation(); onDelete(camera) }}
+              title="Delete camera"
+            >
+              <IconTrash size={12} />
+            </button>
           </div>
         </div>
 
@@ -58,7 +65,7 @@ function CameraCard({ camera, clipCount, onSelect, isSingle }) {
   )
 }
 
-export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera, clipCounts = {}, onAddCamera }) {
+export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera, clipCounts = {}, onAddCamera, onDeleteCamera }) {
   const filtered = activeTab === 'All'
     ? cameras
     : cameras.filter(c => c.location === activeTab)
@@ -98,7 +105,7 @@ export default function CameraGrid({ cameras, locations, activeTab, setActiveTab
               <h2 className={styles.groupTitle}>{location}</h2>
               <div className={`${styles.grid} ${cameras.length === 1 ? styles.gridSingle : ''}`}>
                 {cams.map(cam => (
-                  <CameraCard key={cam.id} camera={cam} clipCount={clipCounts[cam.id] ?? 0} onSelect={onSelectCamera} isSingle={cameras.length === 1} />
+                  <CameraCard key={cam.id} camera={cam} clipCount={clipCounts[cam.id] ?? 0} onSelect={onSelectCamera} onDelete={onDeleteCamera} isSingle={cameras.length === 1} />
                 ))}
               </div>
             </div>

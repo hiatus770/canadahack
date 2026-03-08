@@ -5,7 +5,7 @@ import FeedPanel from './FeedPanel'
 import CameraGrid from './CameraGrid'
 import CameraPlayer from './CameraPlayer'
 import AddCameraModal from './AddCameraModal'
-import { fetchCameras, fetchAlerts, connectAlertWS } from './api'
+import { fetchCameras, fetchAlerts, connectAlertWS, deleteCamera } from './api'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('All')
@@ -81,6 +81,11 @@ export default function App() {
             onSelectCamera={setSelectedCamera}
             clipCounts={clipCounts}
             onAddCamera={() => setShowAddCamera(true)}
+            onDeleteCamera={async (cam) => {
+              if (!confirm(`Delete "${cam.name}"?`)) return
+              await deleteCamera(cam.id)
+              loadCameras()
+            }}
           />
         )}
       </div>

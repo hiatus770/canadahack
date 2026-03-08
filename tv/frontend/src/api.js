@@ -84,6 +84,12 @@ export async function addCamera({ name, location, node, port }) {
   return res.json()
 }
 
+export async function deleteCamera(camId) {
+  const res = await fetch(`/api/cameras/${camId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
 export async function sendCommand(camId, command) {
   const res = await fetch(`/api/cameras/${camId}/command`, {
     method: 'POST',

@@ -4,7 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response, Query, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -122,6 +122,15 @@ async def add_camera_manually(body: CameraManualAdd):
     await db.upsert_camera(cam_data)
     logger.info(f"Camera manually added: {body.name} at {body.node}:{body.port}")
     return {"status": "added", "id": cam_id}
+
+
+@app.delete("/api/cameras/{cam_id}")
+async def delete_camera(cam_id: str):
+    cam = await db.get_camera(cam_id)
+    if cam is None:
+        raise HTTPException(status_code=404, detail="Camera not found")
+    await db.delete_camera(cam_id)
+    return {"status": "deleted"}
 
 
 @app.post("/api/cameras/heartbeat")
