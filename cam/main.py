@@ -241,6 +241,12 @@ def _apply_settings(data: dict):
         config.TAILCLOUD_URL = data["tailcloud_url"]
     if "tailcloud_upload_share" in data:
         config.TAILCLOUD_UPLOAD_SHARE = data["tailcloud_upload_share"]
+    # Re-resolve upload path if cloud settings changed
+    if any(k in data for k in ("tailcloud_url", "tailcloud_upload_share")):
+        try:
+            uploader._resolve_upload_path()
+        except Exception:
+            pass
     if "cam_name" in data:
         config.CAM_NAME = data["cam_name"]
     if "cam_location" in data:
