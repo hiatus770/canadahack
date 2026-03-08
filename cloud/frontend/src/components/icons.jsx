@@ -146,6 +146,15 @@ export function IconTrash() {
   )
 }
 
+export function IconCamera() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M2 7a2 2 0 0 1 2-2h2l1-2h6l1 2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <circle cx="10" cy="10.5" r="3" stroke="currentColor" strokeWidth="1.4"/>
+    </svg>
+  )
+}
+
 export function IconChevronRight() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

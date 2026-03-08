@@ -83,8 +83,12 @@ export default function App() {
             onAddCamera={() => setShowAddCamera(true)}
             onDeleteCamera={async (cam) => {
               if (!confirm(`Delete "${cam.name}"?`)) return
-              await deleteCamera(cam.id)
-              loadCameras()
+              try {
+                await deleteCamera(cam.id)
+                await loadCameras()
+              } catch (e) {
+                console.error('Failed to delete camera:', e)
+              }
             }}
           />
         )}

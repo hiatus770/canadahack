@@ -7,6 +7,7 @@ import Recent from './pages/Recent'
 import TailnetDrive from './pages/TailnetDrive'
 import BrowseFolder from './pages/BrowseFolder'
 import Trash from './pages/Trash'
+import Cameras from './pages/Cameras'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="recent" element={<Recent />} />
           <Route path="machine/:name" element={<TailnetDrive />} />
           <Route path="trash" element={<Trash />} />
+          <Route path="cameras" element={<Cameras />} />
         </Route>
       </Routes>
     </BrowserRouter>

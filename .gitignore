@@ -28,3 +28,9 @@ dist-ssr
 *__pycache__*
 *venv*
 *clips*
+
+# Databases
+*.db
+
+# Compiled binaries
+cloud/backend/tailcloud-backend

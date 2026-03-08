@@ -9,7 +9,7 @@ import { listMachines, getStorage, whoami } from '../api'
 import {
   IconSearch, IconBell,
   IconPlus, IconHome, IconClock,
-  IconServer, IconTrash,
+  IconServer, IconTrash, IconCamera,
 } from './icons'
 import tailCloudLogo from '../assets/tailCloudLogo.svg'
 
@@ -17,6 +17,7 @@ const NAV_MAIN = [
   { label: 'My Drive',       to: '/drive',   Icon: IconHome,   matchPrefix: '/drive' },
   { label: 'Recent',         to: '/recent',  Icon: IconClock  },
   { label: 'Trash',          to: '/trash',   Icon: IconTrash  },
+  { label: 'Cameras',        to: '/cameras', Icon: IconCamera },
 ]
 
 function useDropdown() {

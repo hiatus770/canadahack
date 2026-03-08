@@ -36,6 +36,12 @@ MAX_CLIPS = int(os.environ.get("MAX_CLIPS", "1000"))
 HOST = os.environ.get("CAM_HOST", "0.0.0.0")
 PORT = int(os.environ.get("CAM_PORT", "8554"))
 
+# TailCloud Drive URL (where to upload clips)
+TAILCLOUD_URL = os.environ.get("TAILCLOUD_URL", "http://localhost:8081")
+# Upload path follows Taildrive structure: /{machine}/{share}
+# The uploader will auto-discover the machine name and create the share if needed
+TAILCLOUD_UPLOAD_SHARE = os.environ.get("TAILCLOUD_UPLOAD_SHARE", "camclips")
+
 # Alert cooldown (seconds between alerts of same type)
 ALERT_COOLDOWN = int(os.environ.get("ALERT_COOLDOWN", "30"))
 
