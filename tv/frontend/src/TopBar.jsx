@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './TopBar.module.css'
 import logo from './assets/tailCamLogo.svg'
+import { whoami } from './api'
 
 export default function TopBar() {
   const [open, setOpen] = useState(false)
+  const [userInfo, setUserInfo] = useState(null)
   const ref = useRef(null)
+
+  useEffect(() => {
+    whoami().then(setUserInfo).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -14,6 +20,10 @@ export default function TopBar() {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  const displayName = userInfo?.displayName || 'Unknown'
+  const loginName = userInfo?.loginName || ''
+  const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'
 
   return (
     <header className={styles.header}>
@@ -29,15 +39,15 @@ export default function TopBar() {
             onClick={() => setOpen(v => !v)}
             title="Account"
           >
-            AV
+            {initials}
           </button>
           {open && (
             <div className={styles.dropdown}>
               <div className={styles.profileRow}>
-                <div className={styles.profileAvatar}>AV</div>
+                <div className={styles.profileAvatar}>{initials}</div>
                 <div>
-                  <div className={styles.profileName}>Anastasiya Volgina</div>
-                  <div className={styles.profileEmail}>Anastasiya006@github</div>
+                  <div className={styles.profileName}>{displayName}</div>
+                  <div className={styles.profileEmail}>{loginName}</div>
                 </div>
               </div>
               <div className={styles.dropDivider} />
