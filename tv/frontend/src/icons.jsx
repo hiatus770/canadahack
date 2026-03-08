@@ -27,6 +27,15 @@ export function IconBell({ size = 20 }) {
   )
 }
 
+export function IconCpu({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+      <rect x="5" y="5" width="10" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M7.5 2v3M10 2v3M12.5 2v3M7.5 15v3M10 15v3M12.5 15v3M2 7.5h3M2 10h3M2 12.5h3M15 7.5h3M15 10h3M15 12.5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 export function IconTrash({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none">

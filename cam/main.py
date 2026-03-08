@@ -110,8 +110,10 @@ def status():
         import psutil
         battery = psutil.sensors_battery()
         battery_pct = int(battery.percent) if battery else 100
+        cpu_pct = int(psutil.cpu_percent(interval=0.1))
     except Exception:
         battery_pct = 100
+        cpu_pct = 0
 
     try:
         wifi_signal = 0
@@ -138,6 +140,8 @@ def status():
         "wifi": wifi_signal,
         "motion": counts["motion_count"],
         "persons": counts["person_count"],
+        "cpu": cpu_pct,
+        "fps": camera.actual_fps,
         "port": config.PORT,
     }
 

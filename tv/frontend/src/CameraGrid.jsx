@@ -1,5 +1,5 @@
 import styles from './CameraGrid.module.css'
-import { IconWifi, IconBattery, IconClip, IconPlus, IconTrash } from './icons'
+import { IconWifi, IconBattery, IconClip, IconPlus, IconTrash, IconCpu } from './icons'
 import { getStreamUrl, deleteCamera } from './api'
 import logo from './assets/tailCamLogo.svg'
 
@@ -30,9 +30,12 @@ function CameraCard({ camera, clipCount, onSelect, onDelete, isSingle }) {
         <div className={styles.topOverlay}>
           <div className={styles.topLeft}>
             <IconWifi size={13} level={camera.wifi ?? 100} />
+            <span className={styles.statPct}>{camera.wifi ?? 100}%</span>
             <span className={styles.statDivider} />
             <IconBattery size={15} level={camera.battery ?? 100} />
             <span className={styles.statPct}>{camera.battery ?? 100}%</span>
+            <span className={styles.statDivider} />
+            <span className={styles.statPct}>{camera.fps ?? 0} fps</span>
           </div>
           <div className={styles.topRight}>
             {!isOffline && clipCount > 0 && (

@@ -15,6 +15,9 @@ class CameraCapture:
         self._thread = None
         self._fps = config.FPS
         self._resolution = f"{config.FRAME_WIDTH}x{config.FRAME_HEIGHT}"
+        self._actual_fps = 0.0
+        self._frame_count = 0
+        self._fps_time = time.time()
 
     def start(self):
         if self._running:
@@ -48,6 +51,13 @@ class CameraCapture:
             if ret:
                 with self._lock:
                     self._frame = frame
+                self._frame_count += 1
+                now = time.time()
+                elapsed = now - self._fps_time
+                if elapsed >= 1.0:
+                    self._actual_fps = round(self._frame_count / elapsed, 1)
+                    self._frame_count = 0
+                    self._fps_time = now
 
     def get_frame(self) -> np.ndarray | None:
         with self._lock:
@@ -67,6 +77,10 @@ class CameraCapture:
     @property
     def is_running(self) -> bool:
         return self._running
+
+    @property
+    def actual_fps(self) -> float:
+        return self._actual_fps
 
 
 # Singleton

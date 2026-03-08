@@ -168,6 +168,8 @@ export default function CameraPlayer({ camera, cameras = [], selectedClip, onCle
             <span className={styles.statDivider} />
             <IconBattery size={15} level={camera.battery ?? 100} />
             <span className={styles.statPct}>{camera.battery ?? 100}%</span>
+            <span className={styles.statDivider} />
+            <span className={styles.statPct}>{camera.fps ?? 0} fps</span>
           </div>
 
           {/* Bottom overlay: info + progress + controls */}

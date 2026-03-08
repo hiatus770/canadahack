@@ -19,10 +19,18 @@ async def init_db():
                 battery INTEGER DEFAULT 100,
                 motion INTEGER DEFAULT 0,
                 recording INTEGER DEFAULT 0,
+                cpu INTEGER DEFAULT 0,
+                fps REAL DEFAULT 0,
                 last_seen TEXT,
                 registered_at TEXT
             )
         """)
+        # Migrate existing DBs that may be missing newer columns
+        for col, definition in [("cpu", "INTEGER DEFAULT 0"), ("fps", "REAL DEFAULT 0")]:
+            try:
+                await db.execute(f"ALTER TABLE cameras ADD COLUMN {col} {definition}")
+            except Exception:
+                pass  # Column already exists
         await db.execute("""
             CREATE TABLE IF NOT EXISTS alerts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,13 +95,15 @@ async def update_camera_status(cam_id: str, status_data: dict):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
             UPDATE cameras SET
-                wifi = ?, battery = ?, motion = ?, recording = ?, last_seen = ?
+                wifi = ?, battery = ?, motion = ?, recording = ?, cpu = ?, fps = ?, last_seen = ?
             WHERE id = ?
         """, (
             status_data.get("wifi", 80),
             status_data.get("battery", 100),
             status_data.get("motion", 0),
             1 if status_data.get("recording", False) else 0,
+            status_data.get("cpu", 0),
+            status_data.get("fps", 0),
             datetime.now().isoformat(),
             cam_id,
         ))
