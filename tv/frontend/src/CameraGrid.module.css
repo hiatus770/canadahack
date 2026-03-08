@@ -253,3 +253,17 @@
   font-size: 11px;
   color: rgba(255,255,255,0.7);
 }
+
+/* Single-camera full-width layout */
+.gridSingle {
+  grid-template-columns: 1fr;
+}
+
+.cardSingle {
+  display: flex;
+  flex-direction: column;
+}
+
+.feedSingle {
+  aspect-ratio: 21/9;
+}

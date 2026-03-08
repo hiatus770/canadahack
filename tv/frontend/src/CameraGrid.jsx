@@ -2,15 +2,15 @@ import styles from './CameraGrid.module.css'
 import { IconWifi, IconBattery, IconClip, IconPlus } from './icons'
 import { getStreamUrl } from './api'
 
-function CameraCard({ camera, clipCount, onSelect }) {
+function CameraCard({ camera, clipCount, onSelect, isSingle }) {
   const isOffline = camera.status === 'offline'
   const [c1, c2] = camera.gradient
 
   return (
-    <div className={styles.card} onClick={() => onSelect(camera)}>
+    <div className={`${styles.card} ${isSingle ? styles.cardSingle : ''}`} onClick={() => onSelect(camera)}>
       {/* Feed */}
       <div
-        className={styles.feed}
+        className={`${styles.feed} ${isSingle ? styles.feedSingle : ''}`}
         style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
       >
         {/* Live MJPEG stream */}
@@ -96,9 +96,9 @@ export default function CameraGrid({ cameras, locations, activeTab, setActiveTab
           {Object.entries(groups).map(([location, cams]) => (
             <div key={location} className={styles.group}>
               <h2 className={styles.groupTitle}>{location}</h2>
-              <div className={styles.grid}>
+              <div className={`${styles.grid} ${cameras.length === 1 ? styles.gridSingle : ''}`}>
                 {cams.map(cam => (
-                  <CameraCard key={cam.id} camera={cam} clipCount={clipCounts[cam.id] ?? 0} onSelect={onSelectCamera} />
+                  <CameraCard key={cam.id} camera={cam} clipCount={clipCounts[cam.id] ?? 0} onSelect={onSelectCamera} isSingle={cameras.length === 1} />
                 ))}
               </div>
             </div>

@@ -42,6 +42,7 @@ export default function FeedPanel({ alerts = [], onSelectClip }) {
 
   const allEvents = alerts.map(a => ({
     id: a.id,
+    camera_id: a.camera_id,
     cameraName: a.camera_name || 'Camera',
     type: a.event_type || a.type || 'Motion',
     time: a.timestamp ? new Date(a.timestamp).toLocaleTimeString() : '',
@@ -116,7 +117,7 @@ export default function FeedPanel({ alerts = [], onSelectClip }) {
               <div className={`${styles.dot} ${viewed.has(e.id) ? styles.dotViewed : ''}`} />
               {e.hasClip ? (
                 <img
-                  src={getClipThumbUrl(null, e.id)}
+                  src={getClipThumbUrl(e.camera_id, e.id)}
                   className={styles.thumb}
                   style={{ objectFit: 'cover' }}
                   onError={ev => { ev.currentTarget.style.background = `linear-gradient(135deg, ${e.gradient[0]}, ${e.gradient[1]})`; ev.currentTarget.removeAttribute('src') }}

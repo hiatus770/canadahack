@@ -202,6 +202,22 @@ async def download_clip(cam_id: str, clip_id: str):
     return StreamingResponse(proxy_clip(), media_type="video/mp4")
 
 
+@app.get("/api/cameras/{cam_id}/clips/{clip_id}/thumb")
+async def clip_thumbnail(cam_id: str, clip_id: str):
+    cam = await db.get_camera(cam_id)
+    if cam is None:
+        return JSONResponse(status_code=404, content={"error": "Camera not found"})
+
+    node = cam.get("node", "")
+    port = cam.get("port", 8554)
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            resp = await client.get(f"http://{node}:{port}/clips/{clip_id}/thumb")
+            return Response(content=resp.content, media_type="image/jpeg")
+        except Exception:
+            return JSONResponse(status_code=502, content={"error": "Camera unreachable"})
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  ALERTS
 # ═══════════════════════════════════════════════════════════════════════════════

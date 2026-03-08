@@ -87,7 +87,8 @@ export default function App() {
         alerts={alerts}
         onSelectClip={(clip) => {
           setSelectedClip(clip)
-          if (cameras.length > 0) setSelectedCamera(prev => prev ?? cameras[0])
+          const cam = cameras.find(c => c.id === clip.camera_id) ?? cameras[0]
+          if (cam) setSelectedCamera(cam)
         }}
       />
     </div>
