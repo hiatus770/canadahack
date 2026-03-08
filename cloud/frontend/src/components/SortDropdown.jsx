@@ -5,6 +5,8 @@ import styles from './SortDropdown.module.css'
 const SORT_OPTIONS = [
   { key: 'name', label: 'Name' },
   { key: 'type', label: 'Type' },
+  { key: 'modified', label: 'Modified' },
+  { key: 'size', label: 'Size' },
 ]
 
 export default function SortDropdown({ sort, setSort }) {
@@ -64,9 +66,20 @@ export default function SortDropdown({ sort, setSort }) {
 
 export function useSortedFiles(files, sort) {
   return [...files].sort((a, b) => {
-    let va = sort.key === 'type' ? a.kind : a.name
-    let vb = sort.key === 'type' ? b.kind : b.name
-    const cmp = va.localeCompare(vb)
+    let cmp
+    switch (sort.key) {
+      case 'modified':
+        cmp = new Date(a.modified || 0) - new Date(b.modified || 0)
+        break
+      case 'size':
+        cmp = (a.size || 0) - (b.size || 0)
+        break
+      case 'type':
+        cmp = (a.kind || '').localeCompare(b.kind || '')
+        break
+      default:
+        cmp = a.name.localeCompare(b.name)
+    }
     return sort.dir === 'asc' ? cmp : -cmp
   })
 }
