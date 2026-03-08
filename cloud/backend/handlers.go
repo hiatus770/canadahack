@@ -566,27 +566,36 @@ func (h *Handlers) Preview(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/whoami — identify the connecting Tailscale user by their IP
 func (h *Handlers) WhoAmI(w http.ResponseWriter, r *http.Request) {
-	// Extract client IP — prefer X-Forwarded-For (set by Vite proxy)
+	// Tailscale Serve sets identity headers — use them first (most reliable
+	// since Serve strips spoofed values and the proxy chain loses the real IP)
+	tsLogin := r.Header.Get("Tailscale-User-Login")
+	tsName := r.Header.Get("Tailscale-User-Name")
+	if tsLogin != "" {
+		log.Printf("[whoami] using Tailscale-User headers: login=%q name=%q", tsLogin, tsName)
+		jsonResp(w, map[string]any{
+			"displayName": tsName,
+			"loginName":   tsLogin,
+			"tailscaleIP": r.RemoteAddr,
+		})
+		return
+	}
+
+	// Fall back to IP-based whois for direct connections (not through Serve)
 	clientIP := r.Header.Get("X-Forwarded-For")
 	if clientIP != "" {
-		// X-Forwarded-For can be comma-separated; take the first
 		clientIP = strings.TrimSpace(strings.Split(clientIP, ",")[0])
 	} else {
 		clientIP = r.RemoteAddr
 	}
-	log.Printf("[whoami] raw IP source: XFF=%q RemoteAddr=%q", r.Header.Get("X-Forwarded-For"), r.RemoteAddr)
+	log.Printf("[whoami] no TS headers, trying whois: XFF=%q RemoteAddr=%q", r.Header.Get("X-Forwarded-For"), r.RemoteAddr)
 	if host, _, err := net.SplitHostPort(clientIP); err == nil {
 		clientIP = host
 	}
-	// Strip IPv6-mapped IPv4 prefix (::ffff:100.x.x.x -> 100.x.x.x)
 	clientIP = strings.TrimPrefix(clientIP, "::ffff:")
-	log.Printf("[whoami] resolved clientIP: %s", clientIP)
 
-	// Try tailscale whois on the client IP
 	out, err := exec.Command("tailscale", "whois", "--json", clientIP).Output()
 	if err != nil {
 		log.Printf("[whoami] whois failed for %s: %v — falling back to self", clientIP, err)
-		// Fallback: if not a tailscale IP (e.g. localhost), return server's own info
 		status, err2 := GetTailscaleStatus()
 		if err2 != nil {
 			jsonErr(w, fmt.Sprintf("whoami failed: %v", err), 500)
