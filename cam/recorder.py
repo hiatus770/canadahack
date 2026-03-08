@@ -81,7 +81,7 @@ class ClipRecorder:
                 return None
             h, w = frame.shape[:2]
 
-            fourcc = cv2.VideoWriter_fourcc(*'avc1')
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             writer = cv2.VideoWriter(tmp_video, fourcc, config.FPS, (w, h))
 
             # Start audio recording in parallel
@@ -105,33 +105,30 @@ class ClipRecorder:
             if _AUDIO_AVAILABLE:
                 audio_thread.join(timeout=config.CLIP_DURATION + 2)
 
-            # Mux video + audio with ffmpeg if audio was recorded
+            # Re-encode to browser-compatible H.264 + mux audio if available
+            ffmpeg_cmd = ['ffmpeg', '-y', '-i', tmp_video]
+            cleanup = [tmp_video]
             if _AUDIO_AVAILABLE and os.path.exists(tmp_audio):
-                try:
-                    subprocess.run(
-                        [
-                            'ffmpeg', '-y',
-                            '-i', tmp_video,
-                            '-i', tmp_audio,
-                            '-c:v', 'copy',
-                            '-c:a', 'aac',
-                            '-shortest',
-                            str(filepath),
-                        ],
-                        capture_output=True,
-                        timeout=30,
-                    )
-                except Exception:
-                    # Fallback: just use video without audio
-                    os.rename(tmp_video, str(filepath))
-                finally:
-                    for f in [tmp_video, tmp_audio]:
-                        try:
-                            os.remove(f)
-                        except OSError:
-                            pass
-            else:
+                ffmpeg_cmd += ['-i', tmp_audio]
+                cleanup.append(tmp_audio)
+            ffmpeg_cmd += [
+                '-c:v', 'libx264', '-preset', 'fast',
+                '-pix_fmt', 'yuv420p',  # required for browser playback
+                '-movflags', '+faststart',  # allows streaming before full download
+            ]
+            if _AUDIO_AVAILABLE and os.path.exists(tmp_audio):
+                ffmpeg_cmd += ['-c:a', 'aac', '-shortest']
+            ffmpeg_cmd.append(str(filepath))
+            try:
+                subprocess.run(ffmpeg_cmd, capture_output=True, timeout=60)
+            except Exception:
                 os.rename(tmp_video, str(filepath))
+            finally:
+                for f in cleanup:
+                    try:
+                        os.remove(f)
+                    except OSError:
+                        pass
 
             meta = {
                 "id": clip_id,
