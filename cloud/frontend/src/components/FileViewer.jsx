@@ -5,6 +5,8 @@ import { KIND_MAP } from './FileCard'
 import { useApp } from '../context/AppContext'
 
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp']
+const VIDEO_EXTS = ['.mp4', '.webm', '.ogg', '.mov']
+const PDF_EXTS = ['.pdf']
 
 function getExt(name) {
   const i = name.lastIndexOf('.')
@@ -46,6 +48,8 @@ export default function FileViewer({ file, onClose, onShare }) {
 
   const ext = getExt(file.name)
   const isImage = IMAGE_EXTS.includes(ext)
+  const isVideo = VIDEO_EXTS.includes(ext)
+  const isPdf = PDF_EXTS.includes(ext)
   const kindInfo = KIND_MAP[file.kind] || KIND_MAP.document
 
   // Fetch current user identity
@@ -63,7 +67,7 @@ export default function FileViewer({ file, onClose, onShare }) {
   }, [file.path])
 
   useEffect(() => {
-    if (isImage) {
+    if (isImage || isVideo || isPdf) {
       setLoading(false)
       return
     }
@@ -152,6 +156,20 @@ export default function FileViewer({ file, onClose, onShare }) {
                 className={styles.imagePreview}
                 src={`/api/download?path=${encodeURIComponent(file.path)}`}
                 alt={file.name}
+              />
+            ) : isVideo ? (
+              <video
+                className={styles.imagePreview}
+                src={`/api/download?path=${encodeURIComponent(file.path)}`}
+                controls
+                autoPlay
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              />
+            ) : isPdf ? (
+              <embed
+                src={`/api/download?path=${encodeURIComponent(file.path)}`}
+                type="application/pdf"
+                style={{ width: '100%', height: '100%' }}
               />
             ) : preview?.type === 'text' && preview.content ? (
               <pre className={styles.textContent}>{preview.content}</pre>

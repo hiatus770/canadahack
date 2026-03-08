@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net"
 	"net/http"
 	"os"
@@ -239,8 +240,7 @@ func (h *Handlers) Download(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer reader.Close()
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, name))
-		w.Header().Set("Content-Type", "application/octet-stream")
+		setContentHeaders(w, name)
 		io.Copy(w, reader)
 		return
 	}
@@ -252,9 +252,25 @@ func (h *Handlers) Download(w http.ResponseWriter, r *http.Request) {
 	}
 	defer reader.Close()
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, name))
-	w.Header().Set("Content-Type", "application/octet-stream")
+	setContentHeaders(w, name)
 	io.Copy(w, reader)
+}
+
+func setContentHeaders(w http.ResponseWriter, name string) {
+	ct := mime.TypeByExtension(filepath.Ext(name))
+	if ct == "" {
+		ct = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", ct)
+	// Inline disposition for browser-previewable types
+	switch {
+	case strings.HasPrefix(ct, "image/"),
+		strings.HasPrefix(ct, "video/"),
+		ct == "application/pdf":
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, name))
+	default:
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, name))
+	}
 }
 
 // POST /api/upload?path=... — upload file(s) via multipart form

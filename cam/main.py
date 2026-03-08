@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import threading
 import time
 
@@ -346,5 +347,8 @@ def phone_stream():
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    import signal
     import uvicorn
+
+    signal.signal(signal.SIGINT, lambda *_: os._exit(0))
     uvicorn.run("main:app", host=config.HOST, port=config.PORT, reload=False)

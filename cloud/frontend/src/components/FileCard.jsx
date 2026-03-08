@@ -22,6 +22,8 @@ const KIND_MAP = {
 }
 
 const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'])
+const VIDEO_EXTS = new Set(['.mp4', '.webm', '.ogg', '.mov'])
+const PDF_EXTS = new Set(['.pdf'])
 const TEXT_EXTS = new Set([
   '.txt', '.md', '.json', '.yaml', '.yml', '.toml', '.ini', '.conf', '.cfg',
   '.sh', '.py', '.go', '.js', '.ts', '.jsx', '.tsx', '.rb', '.pl', '.csv',
@@ -55,6 +57,27 @@ function FilePreviewContent({ file }) {
     )
   }
 
+  if (VIDEO_EXTS.has(ext) && file.path) {
+    return (
+      <video
+        src={`/api/download?path=${encodeURIComponent(file.path)}`}
+        muted
+        preload="metadata"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+    )
+  }
+
+  if (PDF_EXTS.has(ext) && file.path) {
+    return (
+      <embed
+        src={`/api/download?path=${encodeURIComponent(file.path)}#page=1&view=FitH`}
+        type="application/pdf"
+        style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
+      />
+    )
+  }
+
   if (TEXT_EXTS.has(ext) && text !== null) {
     return (
       <pre style={{
@@ -84,7 +107,7 @@ export default function FileCard({ file, selected, onSelect, onDelete, onRename,
   const { name, kind, collabs = [] } = file
   const { Icon, label, thumb, dark } = KIND_MAP[kind] ?? KIND_MAP.document
   const ext = getExt(name)
-  const hasRichPreview = IMAGE_EXTS.has(ext) || TEXT_EXTS.has(ext)
+  const hasRichPreview = IMAGE_EXTS.has(ext) || TEXT_EXTS.has(ext) || VIDEO_EXTS.has(ext) || PDF_EXTS.has(ext)
   const [renaming, setRenaming] = useState(false)
   const [renameVal, setRenameVal] = useState(name)
   const renameRef = useRef(null)
