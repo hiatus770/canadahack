@@ -1,5 +1,5 @@
 import styles from './CameraGrid.module.css'
-import { IconWifi, IconBattery, IconMore } from './icons'
+import { IconWifi, IconBattery, IconClip, IconPlus } from './icons'
 import { getStreamUrl } from './api'
 
 function CameraCard({ camera, clipCount, onSelect }) {
@@ -28,16 +28,15 @@ function CameraCard({ camera, clipCount, onSelect }) {
         {/* Top overlay */}
         <div className={styles.topOverlay}>
           <div className={styles.topLeft}>
-            <IconWifi size={13} />
-            <IconBattery size={15} />
+            <IconWifi size={13} level={camera.wifi ?? 100} />
+            <span className={styles.statDivider} />
+            <IconBattery size={15} level={camera.battery ?? 100} />
+            <span className={styles.statPct}>{camera.battery ?? 100}%</span>
           </div>
           <div className={styles.topRight}>
             {!isOffline && clipCount > 0 && (
-              <span className={styles.motionBadge}>{clipCount}</span>
+              <span className={styles.motionBadge}><IconClip size={12} /> {clipCount}</span>
             )}
-            <button className={styles.moreBtn} onClick={e => e.stopPropagation()}>
-              <IconMore size={14} />
-            </button>
           </div>
         </div>
 
@@ -59,7 +58,7 @@ function CameraCard({ camera, clipCount, onSelect }) {
   )
 }
 
-export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera, clipCounts = {} }) {
+export default function CameraGrid({ cameras, locations, activeTab, setActiveTab, onSelectCamera, clipCounts = {}, onAddCamera }) {
   const filtered = activeTab === 'All'
     ? cameras
     : cameras.filter(c => c.location === activeTab)
@@ -87,6 +86,9 @@ export default function CameraGrid({ cameras, locations, activeTab, setActiveTab
               </button>
             ))}
           </div>
+          <button className={styles.addCameraBtn} onClick={onAddCamera}>
+            <IconPlus size={14} /> Add Camera
+          </button>
         </div>
 
         {/* Content */}

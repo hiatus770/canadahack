@@ -165,7 +165,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 20px 14px 10px;
+  padding: 20px 14px 18px;
   z-index: 3;
 }
 
@@ -217,6 +217,12 @@
   flex-shrink: 0;
 }
 
+.liveBottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
 .ctrlLeft  { display: flex; align-items: center; gap: 10px; flex: 1; }
 .ctrlCenter{ display: flex; align-items: center; gap: 6px;  }
 .ctrlRight { display: flex; align-items: center; gap: 8px;  flex: 1; justify-content: flex-end; }
@@ -234,6 +240,7 @@
   transition: all var(--transition);
 }
 .ctrlBtn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
 
 .ctrlPlay {
   width: 38px;

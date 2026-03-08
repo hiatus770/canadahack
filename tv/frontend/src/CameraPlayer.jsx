@@ -3,8 +3,8 @@ import styles from './CameraPlayer.module.css'
 import {
   IconChevronLeft, IconChevronRight,
   IconPlay, IconPause, IconSkipBack, IconSkipForward,
-  IconRewind, IconFastForward, IconVolume, IconFullscreen,
-  IconMic, IconCamera,
+  IconVolume, IconFullscreen,
+  IconVolumeOff, IconSkip1Back, IconSkip1Forward,
 } from './icons'
 import { getStreamUrl, getClipDownloadUrl } from './api'
 
@@ -17,6 +17,7 @@ function fmtTime(s) {
 
 export default function CameraPlayer({ camera, cameras = [], selectedClip, onClearClip, onBack }) {
   const videoRef = useRef(null)
+  const videoContainerRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -72,11 +73,26 @@ export default function CameraPlayer({ camera, cameras = [], selectedClip, onCle
     v.currentTime = Math.max(0, Math.min(v.duration, v.currentTime + secs))
   }, [])
 
+  // React's `muted` prop doesn't update the DOM property on re-renders (known React bug),
+  // so we sync it directly via useEffect.
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = muted
+    }
+  }, [muted])
+
+  const toggleFullscreen = useCallback(() => {
+    const el = videoContainerRef.current
+    if (!el) return
+    if (!document.fullscreenElement) {
+      el.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }, [])
+
   const toggleMute = useCallback(() => {
-    const v = videoRef.current
-    if (!v) return
-    v.muted = !v.muted
-    setMuted(v.muted)
+    setMuted(m => !m)
   }, [])
 
   const formatClock = (d) => {
@@ -115,6 +131,7 @@ export default function CameraPlayer({ camera, cameras = [], selectedClip, onCle
 
         {/* Main video */}
         <div
+          ref={videoContainerRef}
           className={styles.video}
           style={{ background: `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)` }}
         >
@@ -164,69 +181,63 @@ export default function CameraPlayer({ camera, cameras = [], selectedClip, onCle
             </span>
           </div>
 
-          {/* Top-right controls */}
-          <div className={styles.videoTopRight}>
-            {[IconMic, IconCamera, IconCamera].map((Icon, i) => (
-              <button key={i} className={styles.videoBtn}><Icon size={15} /></button>
-            ))}
-          </div>
-
           {/* Bottom overlay: info + progress + controls */}
           <div className={styles.bottomOverlay}>
-            <div className={styles.videoInfo}>
-              <div className={styles.videoName}>
-                {camera.location}: {camera.name}
-                {isLive && <span className={styles.livePill}>LIVE</span>}
-              </div>
-              <div className={styles.videoDate}>
-                {(() => {
-                  const c = isLive ? clock : formatClock(new Date(selectedClip.timestamp))
-                  return <>{c.date}<span style={{margin: '0 8px'}}/>{c.time}</>
-                })()}
-              </div>
-            </div>
-            {!isLive && (
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={progress}
-                onChange={handleSeek}
-                className={styles.progressBar}
-              />
-            )}
-            <div className={styles.controls}>
-              {isLive ? (
-                <div className={styles.ctrlRight} style={{ flex: 1 }}>
-                  <button className={`${styles.liveBtn} ${styles.liveBtnActive}`} onClick={onClearClip}>Live Video</button>
-                  <button className={styles.ctrlBtn}><IconCamera size={15} /></button>
-                  <button className={styles.ctrlBtn}><IconFullscreen size={15} /></button>
+            {isLive ? (
+              <div className={styles.liveBottom}>
+                <div className={styles.videoInfo}>
+                  <div className={styles.videoName}>
+                    {camera.location}: {camera.name}
+                    <span className={styles.livePill}>LIVE</span>
+                  </div>
+                  <div className={styles.videoDate}>
+                    {clock.date}<span style={{margin: '0 8px'}}/>{clock.time}
+                  </div>
                 </div>
-              ) : (
-                <>
+                <button className={styles.ctrlBtn} onClick={toggleFullscreen}><IconFullscreen size={15} /></button>
+              </div>
+            ) : (
+              <>
+                <div className={styles.videoInfo}>
+                  <div className={styles.videoName}>{camera.location}: {camera.name}</div>
+                  <div className={styles.videoDate}>
+                    {(() => {
+                      const c = formatClock(new Date(selectedClip.timestamp))
+                      return <>{c.date}<span style={{margin: '0 8px'}}/>{c.time}</>
+                    })()}
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progress}
+                  onChange={handleSeek}
+                  className={styles.progressBar}
+                />
+                <div className={styles.controls}>
                   <div className={styles.ctrlLeft}>
                     <button className={styles.ctrlBtn} onClick={toggleMute}>
-                      <IconVolume size={16} style={muted ? { opacity: 0.4 } : {}} />
+                      {muted ? <IconVolumeOff size={16} /> : <IconVolume size={16} />}
                     </button>
                     <span className={styles.ctrlTime}>{fmtTime(currentTime)} / {fmtTime(duration)}</span>
                   </div>
                   <div className={styles.ctrlCenter}>
                     <button className={styles.ctrlBtn} onClick={() => skipBy(-30)}><IconSkipBack size={16} /></button>
-                    <button className={styles.ctrlBtn} onClick={() => skipBy(-10)}><IconRewind size={16} /></button>
+                    <button className={styles.ctrlBtn} onClick={() => skipBy(-1)}><IconSkip1Back size={20} /></button>
                     <button className={`${styles.ctrlBtn} ${styles.ctrlPlay}`} onClick={togglePlay}>
                       {playing ? <IconPause size={18} /> : <IconPlay size={18} />}
                     </button>
-                    <button className={styles.ctrlBtn} onClick={() => skipBy(10)}><IconFastForward size={16} /></button>
+                    <button className={styles.ctrlBtn} onClick={() => skipBy(1)}><IconSkip1Forward size={20} /></button>
                     <button className={styles.ctrlBtn} onClick={() => skipBy(30)}><IconSkipForward size={16} /></button>
                   </div>
                   <div className={styles.ctrlRight}>
                     <button className={styles.liveBtn} onClick={onClearClip}>Live Video</button>
-                    <button className={styles.ctrlBtn}><IconCamera size={15} /></button>
-                    <button className={styles.ctrlBtn}><IconFullscreen size={15} /></button>
+                    <button className={styles.ctrlBtn} onClick={toggleFullscreen}><IconFullscreen size={15} /></button>
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>{/* cardOuter */}

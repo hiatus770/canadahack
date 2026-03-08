@@ -80,6 +80,7 @@ export default function App() {
             setActiveTab={setActiveTab}
             onSelectCamera={setSelectedCamera}
             clipCounts={clipCounts}
+            onAddCamera={() => alert('Add camera: point a camera node at this TailTV backend to register automatically.')}
           />
         )}
       </div>

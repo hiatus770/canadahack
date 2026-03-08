@@ -40,7 +40,25 @@
 .tabs {
   display: flex;
   gap: 4px;
+  flex: 1;
 }
+
+.addCameraBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.addCameraBtn:hover { background: var(--gray-100); border-color: var(--gray-400); }
 
 .tab {
   height: 32px;
@@ -134,8 +152,26 @@
 .topLeft {
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: rgba(255,255,255,0.85);
+  gap: 4px;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  border-radius: 9999px;
+  padding: 3px 10px;
+  color: rgba(255,255,255,0.9);
+}
+
+.statPct {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  font-variant-numeric: tabular-nums;
+}
+
+.statDivider {
+  width: 1px;
+  height: 10px;
+  background: rgba(255,255,255,0.25);
+  margin: 0 2px;
 }
 
 .topRight {
@@ -145,11 +181,14 @@
 }
 
 .motionBadge {
-  background: rgba(0,0,0,0.5);
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.9);
   font-size: 12px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
   backdrop-filter: blur(4px);
 }

@@ -110,9 +110,21 @@ def status():
         import psutil
         battery = psutil.sensors_battery()
         battery_pct = int(battery.percent) if battery else 100
-        wifi_signal = 80  # Approximate — psutil can't easily read RSSI
     except Exception:
         battery_pct = 100
+
+    try:
+        wifi_signal = 0
+        with open("/proc/net/wireless") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 4 and parts[0].endswith(':'):
+                    # link quality is parts[2], strip trailing dot
+                    quality = float(parts[2].rstrip('.'))
+                    # quality is typically out of 70; normalize to 0-100
+                    wifi_signal = min(100, int(quality / 70 * 100))
+                    break
+    except Exception:
         wifi_signal = 80
 
     return {
