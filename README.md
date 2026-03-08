@@ -239,3 +239,5 @@ canadahack/
 ├── assets/               # Logos (TailCam, TailCloud)
 └── restart.sh            # Quick restart script for TailCloud
 ```
+
+hello
