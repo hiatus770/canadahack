@@ -4,10 +4,12 @@ import TopBar from './TopBar'
 import FeedPanel from './FeedPanel'
 import CameraGrid from './CameraGrid'
 import CameraPlayer from './CameraPlayer'
+import AddCameraModal from './AddCameraModal'
 import { fetchCameras, fetchAlerts, connectAlertWS } from './api'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('All')
+  const [showAddCamera, setShowAddCamera] = useState(false)
   const [selectedCamera, setSelectedCamera] = useState(null)
   const [selectedClip, setSelectedClip] = useState(null)
   const [cameras, setCameras] = useState([])
@@ -78,7 +80,7 @@ export default function App() {
             setActiveTab={setActiveTab}
             onSelectCamera={setSelectedCamera}
             clipCounts={clipCounts}
-            onAddCamera={() => alert('Add camera: point a camera node at this TailTV backend to register automatically.')}
+            onAddCamera={() => setShowAddCamera(true)}
           />
         )}
       </div>
@@ -92,6 +94,13 @@ export default function App() {
         }}
       />
     </div>
+
+    {showAddCamera && (
+      <AddCameraModal
+        onClose={() => setShowAddCamera(false)}
+        onAdded={loadCameras}
+      />
+    )}
     </div>
   )
 }

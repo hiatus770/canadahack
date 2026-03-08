@@ -74,6 +74,16 @@ export function getClipThumbUrl(camId, clipId) {
   return `/api/cameras/${camId}/clips/${clipId}/thumb`
 }
 
+export async function addCamera({ name, location, node, port }) {
+  const res = await fetch('/api/cameras/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, location, node, port }),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
 export async function sendCommand(camId, command) {
   const res = await fetch(`/api/cameras/${camId}/command`, {
     method: 'POST',

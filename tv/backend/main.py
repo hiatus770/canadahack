@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import db
-from models import CameraRegister, CameraHeartbeat, AlertIn, CommandIn
+from models import CameraRegister, CameraHeartbeat, AlertIn, CommandIn, CameraManualAdd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tailtv")
@@ -102,6 +102,26 @@ async def register_camera(body: CameraRegister, request: Request):
     await db.upsert_camera(cam_data)
     logger.info(f"Camera registered: {body.name} ({body.id}) from {client_host}")
     return {"status": "registered"}
+
+
+
+
+@app.post("/api/cameras/add")
+async def add_camera_manually(body: CameraManualAdd):
+    """Manually add a camera by specifying its node IP and port."""
+    import uuid
+    cam_id = str(uuid.uuid4())[:8]
+    cam_data = {
+        "id": cam_id,
+        "name": body.name,
+        "location": body.location,
+        "node": body.node,
+        "port": body.port,
+        "resolution": "1280x720",
+    }
+    await db.upsert_camera(cam_data)
+    logger.info(f"Camera manually added: {body.name} at {body.node}:{body.port}")
+    return {"status": "added", "id": cam_id}
 
 
 @app.post("/api/cameras/heartbeat")

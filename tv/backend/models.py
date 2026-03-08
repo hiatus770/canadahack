@@ -51,3 +51,10 @@ class AlertOut(BaseModel):
 
 class CommandIn(BaseModel):
     command: str  # "start_recording", "stop_recording", "snapshot", "reboot"
+
+
+class CameraManualAdd(BaseModel):
+    name: str
+    location: str
+    node: str   # Tailscale IP or hostname
+    port: int = 8554
