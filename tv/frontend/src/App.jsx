@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import styles from './App.module.css'
-import LeftRail from './LeftRail'
+import TopBar from './TopBar'
 import FeedPanel from './FeedPanel'
 import CameraGrid from './CameraGrid'
 import CameraPlayer from './CameraPlayer'
 import { fetchCameras, fetchAlerts, connectAlertWS } from './api'
 
 export default function App() {
-  const [railActive, setRailActive] = useState('home')
   const [activeTab, setActiveTab] = useState('All')
   const [selectedCamera, setSelectedCamera] = useState(null)
   const [selectedClip, setSelectedClip] = useState(null)
@@ -60,9 +59,8 @@ export default function App() {
 
   return (
     <div className={styles.root}>
-    <div className={styles.shell}>
-      <LeftRail active={railActive} setActive={setRailActive} />
-
+      <TopBar />
+      <div className={styles.shell}>
       <div className={styles.middle}>
         {selectedCamera ? (
           <CameraPlayer
