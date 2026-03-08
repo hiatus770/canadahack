@@ -45,6 +45,7 @@ export default function FeedPanel({ alerts = [], onSelectClip }) {
     cameraName: a.camera_name || 'Camera',
     type: a.event_type || a.type || 'Motion',
     time: a.timestamp ? new Date(a.timestamp).toLocaleTimeString() : '',
+    timestamp: a.timestamp || '',
     dateStr: a.timestamp ? a.timestamp.slice(0, 10) : '',
     gradient: alertGradients[a.type] || ['#1a1e2e','#10121e'],
     hasClip: typeof a.id === 'string' && a.id.includes('_'),
